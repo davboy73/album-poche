@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ma Galerie — David Boyer Photographe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0e1b2a; --navy-light: #1a2d42; --navy-mid: #152333;
+      --gold: #c9a96e; --cream: #f7f4ef; --text-muted: #8a9bb0;
+    }
+    body { background: var(--navy); color: var(--cream); font-family: 'Montserrat', sans-serif; font-weight: 300; min-height: 100vh; user-select: none; -webkit-user-select: none; }
+    header { position: sticky; top: 0; z-index: 100; background: var(--navy); border-bottom: 1px solid rgba(201,169,110,0.12); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .header-initials { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; color: var(--gold); letter-spacing: 0.1em; }
+    .header-name { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); margin-left: 0.75rem; }
+    .header-client-name { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; color: var(--cream); text-align: right; }
+    .header-client-count { font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.2rem; text-align: right; }
+    .btn-logout { background: transparent; border: 1px solid rgba(201,169,110,0.25); border-radius: 2px; color: var(--text-muted); font-family: 'Montserrat', sans-serif; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; padding: 0.4rem 0.8rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+    .gallery-header { padding: 2.5rem 2rem 1.5rem; text-align: center; }
+    .gallery-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; font-style: italic; color: var(--cream); }
+    .gallery-subtitle { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.5rem; }
+    .divider { width: 30px; height: 1px; background: var(--gold); margin: 1.5rem auto; opacity: 0.4; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 3px; padding: 0 2rem 3rem; max-width: 1200px; margin: 0 auto; }
+    .grid-item { position: relative; aspect-ratio: 3/2; overflow: hidden; cursor: pointer; background: var(--navy-light); }
+    .grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; pointer-events: none; }
+    .grid-item:hover img { transform: scale(1.04); }
+    .grid-item-overlay { position: absolute; inset: 0; background: rgba(14,27,42,0); transition: background 0.3s; }
+    .grid-item:hover .grid-item-overlay { background: rgba(14,27,42,0.2); }
+    .skeleton { background: linear-gradient(90deg, var(--navy-light) 25%, var(--navy-mid) 50%, var(--navy-light) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .lightbox { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(14,27,42,0.97); align-items: center; justify-content: center; flex-direction: column; }
+    .lightbox.open { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 82vh; object-fit: contain; display: block; pointer-events: none; border: 1px solid rgba(201,169,110,0.1); }
+    .lightbox-close { position: absolute; top: 1.25rem; right: 1.5rem; background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
+    .lightbox-close:hover { color: var(--cream); }
+    .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(14,27,42,0.7); border: 1px solid rgba(201,169,110,0.2); border-radius: 2px; color: var(--gold); font-size: 1.2rem; padding: 0.6rem 0.9rem; cursor: pointer; transition: all 0.2s; z-index: 10; }
+    .lightbox-nav:hover { background: rgba(201,169,110,0.15); }
+    .lightbox-prev { left: 1.5rem; } .lightbox-next { right: 1.5rem; }
+    .lightbox-counter { margin-top: 1.25rem; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
+    .state-center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 40vh; gap: 1rem; color: var(--text-muted); }
+    .state-text { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; }
+    @media (max-width: 600px) { header { padding: 0.75rem 1rem; } .grid { padding: 0 0.25rem 2rem; gap: 2px; } }
+  </style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:baseline;">
+    <span class="header-initials">DB</span>
+    <span class="header-name">David Boyer · Photographe</span>
+  </div>
+  <div>
+    <div class="header-client-name" id="clientName">—</div>
+    <div class="header-client-count" id="clientCount"></div>
+  </div>
+  <button class="btn-logout" onclick="logout()">Quitter</button>
+</header>
+
+<div class="gallery-header">
+  <h1 class="gallery-title">Votre galerie</h1>
+  <p class="gallery-subtitle" id="sessionLabel">Chargement…</p>
+  <div class="divider"></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightboxBtn()">✕</button>
+  <button class="lightbox-nav lightbox-prev" onclick="navLightbox(-1,event)">‹</button>
+  <img id="lbImg" src="" alt="">
+  <button class="lightbox-nav lightbox-next" onclick="navLightbox(1,event)">›</button>
+  <div class="lightbox-counter" id="lbCounter"></div>
+</div>
+
+<script src="firebase-config.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const token = sessionStorage.getItem('albumToken');
+  if (!token) { window.location.href = 'index.html'; }
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && ['s','u','p'].includes(e.key.toLowerCase())) e.preventDefault(); });
+  document.addEventListener('dragstart', e => e.preventDefault());
+
+  let photos = [];
+  let currentIndex = 0;
+
+  async function loadGallery() {
+    const grid = document.getElementById('grid');
+    for (let i = 0; i < 6; i++) {
+      const sk = document.createElement('div');
+      sk.className = 'grid-item skeleton';
+      grid.appendChild(sk);
+    }
+    try {
+      const snap = await getDoc(doc(db, 'clients', token));
+      if (!snap.exists()) { window.location.href = 'index.html'; return; }
+      const data = snap.data();
+      const photoUrls = data.photos || [];
+
+      document.getElementById('clientName').textContent = data.nom || '—';
+      document.getElementById('sessionLabel').textContent = data.session || '';
+      document.getElementById('clientCount').textContent = photoUrls.length + (photoUrls.length > 1 ? ' photos' : ' photo');
+
+      grid.innerHTML = '';
+      if (photoUrls.length === 0) {
+        grid.innerHTML = `<div class="state-center" style="grid-column:1/-1"><p class="state-text">Votre galerie sera disponible prochainement</p></div>`;
+        return;
+      }
+
+      // Les URLs Cloudinary sont directes — pas besoin de token signé
+      // On ajoute fl_attachment:false pour empêcher le téléchargement natif
+      photos = photoUrls.map(url => url.replace('/upload/', '/upload/fl_attachment:false/'));
+
+      photoUrls.forEach((url, i) => {
+        // Miniature via Cloudinary (resize auto)
+        const thumbUrl = url.replace('/upload/', '/upload/w_400,c_fill,q_auto,f_auto/');
+        const item = document.createElement('div');
+        item.className = 'grid-item';
+        item.innerHTML = `<img src="${thumbUrl}" alt="Photo ${i+1}" loading="lazy"><div class="grid-item-overlay"></div>`;
+        item.addEventListener('click', () => openLightbox(i));
+        grid.appendChild(item);
+      });
+
+    } catch(e) {
+      console.error(e);
+      grid.innerHTML = `<div class="state-center" style="grid-column:1/-1"><p class="state-text">Erreur de chargement — réessayez</p></div>`;
+    }
+  }
+
+  window.openLightbox = function(i) {
+    currentIndex = i;
+    updateLightbox();
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  function updateLightbox() {
+    document.getElementById('lbImg').src = photos[currentIndex];
+    document.getElementById('lbCounter').textContent = `${currentIndex+1} / ${photos.length}`;
+  }
+
+  window.closeLightbox = function(e) { if (e.target === document.getElementById('lightbox')) closeLightboxBtn(); };
+  window.closeLightboxBtn = function() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; };
+  window.navLightbox = function(dir, e) { e.stopPropagation(); currentIndex = (currentIndex+dir+photos.length)%photos.length; updateLightbox(); };
+
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('open')) return;
+    if (e.key==='ArrowRight') navLightbox(1,{stopPropagation:()=>{}});
+    if (e.key==='ArrowLeft') navLightbox(-1,{stopPropagation:()=>{}});
+    if (e.key==='Escape') closeLightboxBtn();
+  });
+
+  window.logout = function() { sessionStorage.clear(); window.location.href = 'index.html'; };
+
+  loadGallery();
+</script>
+</body>
+</html>

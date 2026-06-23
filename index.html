@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mes Photos — David Boyer Photographe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0e1b2a;
+      --navy-light: #1a2d42;
+      --gold: #c9a96e;
+      --gold-light: #e2c99a;
+      --cream: #f7f4ef;
+      --text-muted: #8a9bb0;
+    }
+
+    body {
+      background: var(--navy);
+      color: var(--cream);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .logo-area {
+      margin-bottom: 3rem;
+    }
+
+    .logo-initials {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3.5rem;
+      font-weight: 300;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      line-height: 1;
+    }
+
+    .logo-name {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+      margin: 2.5rem auto;
+      opacity: 0.5;
+    }
+
+    .headline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      font-style: italic;
+      color: var(--cream);
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.02em;
+    }
+
+    .subline {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      line-height: 1.7;
+    }
+
+    .card {
+      background: var(--navy-light);
+      border: 1px solid rgba(201, 169, 110, 0.15);
+      border-radius: 2px;
+      padding: 2.5rem 2rem;
+      margin-top: 2.5rem;
+    }
+
+    .card label {
+      display: block;
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      text-align: left;
+    }
+
+    .card input {
+      width: 100%;
+      background: var(--navy);
+      border: 1px solid rgba(201, 169, 110, 0.2);
+      border-radius: 2px;
+      color: var(--cream);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      padding: 0.85rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .card input:focus {
+      border-color: var(--gold);
+    }
+
+    .card input::placeholder {
+      color: rgba(138, 155, 176, 0.4);
+      letter-spacing: 0.1em;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      margin-top: 1.25rem;
+      padding: 0.9rem 1rem;
+      background: transparent;
+      border: 1px solid var(--gold);
+      border-radius: 2px;
+      color: var(--gold);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--gold);
+      color: var(--navy);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .message {
+      margin-top: 1rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      min-height: 1.2em;
+    }
+
+    .message.error { color: #e07070; }
+    .message.info  { color: var(--text-muted); }
+
+    .footer {
+      margin-top: 3rem;
+      font-size: 0.6rem;
+      color: rgba(138, 155, 176, 0.35);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* Token mode (URL avec ?token=...) */
+    .auto-access {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo-area">
+    <div class="logo-initials">DB</div>
+    <div class="logo-name">David Boyer · Photographe</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <p class="headline">Vos souvenirs vous attendent</p>
+  <p class="subline">Accédez à votre galerie personnelle<br>en saisissant votre code d'accès</p>
+
+  <div class="card" id="loginCard">
+    <label for="tokenInput">Votre code d'accès</label>
+    <input type="text" id="tokenInput" placeholder="ex : AB12-CD34-EF56" autocomplete="off" spellcheck="false">
+    <button class="btn" id="accessBtn" onclick="accessGallery()">Accéder à ma galerie</button>
+    <p class="message" id="msg"></p>
+  </div>
+
+  <p class="footer">© David Boyer Photographe · Attignat</p>
+</div>
+
+<!-- Firebase -->
+<script src="firebase-config.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Vérification token depuis URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlToken = urlParams.get('token');
+  if (urlToken) {
+    document.getElementById('tokenInput').value = urlToken;
+    setTimeout(() => accessGallery(), 300);
+  }
+
+  window.accessGallery = async function() {
+    const btn = document.getElementById('accessBtn');
+    const msg = document.getElementById('msg');
+    const raw = document.getElementById('tokenInput').value.trim().toUpperCase().replace(/\s/g, '');
+
+    if (!raw) {
+      msg.className = 'message error';
+      msg.textContent = 'Veuillez saisir votre code d\'accès.';
+      return;
+    }
+
+    btn.disabled = true;
+    msg.className = 'message info';
+    msg.textContent = 'Vérification en cours…';
+
+    try {
+      const ref = doc(db, 'clients', raw);
+      const snap = await getDoc(ref);
+
+      if (!snap.exists()) {
+        msg.className = 'message error';
+        msg.textContent = 'Code invalide. Vérifiez votre email.';
+        btn.disabled = false;
+        return;
+      }
+
+      const data = snap.data();
+      if (data.actif === false) {
+        msg.className = 'message error';
+        msg.textContent = 'Cet accès a expiré. Contactez le photographe.';
+        btn.disabled = false;
+        return;
+      }
+
+      // Stocker en session et rediriger
+      sessionStorage.setItem('albumToken', raw);
+      sessionStorage.setItem('albumClient', JSON.stringify(data));
+      window.location.href = 'gallery.html';
+
+    } catch (e) {
+      console.error(e);
+      msg.className = 'message error';
+      msg.textContent = 'Erreur de connexion. Réessayez.';
+      btn.disabled = false;
+    }
+  };
+
+  // Permettre Entrée sur le champ
+  document.getElementById('tokenInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.accessGallery();
+  });
+</script>
+
+</body>
+</html>
