@@ -19,10 +19,10 @@
     .header-name { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); margin-left: 0.75rem; }
     .header-badge { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(201,169,110,0.3); border-radius: 2px; padding: 0.3rem 0.7rem; }
     #adminLogin { max-width: 380px; margin: 6rem auto; text-align: center; padding: 2rem; }
-    #adminApp { display: none; max-width: 1100px; margin: 0 auto; padding: 2rem; gap: 2rem; }
+    #adminApp { display: none; max-width: 1200px; margin: 0 auto; padding: 2rem; gap: 2rem; }
     #adminApp.visible { display: grid; grid-template-columns: 400px 1fr; align-items: start; }
     @media (max-width: 900px) { #adminApp.visible { grid-template-columns: 1fr; } }
-    .panel { background: var(--navy-light); border: 1px solid rgba(201,169,110,0.12); border-radius: 2px; overflow: hidden; }
+    .panel { background: var(--navy-light); border: 1px solid rgba(201,169,110,0.12); border-radius: 2px; overflow: hidden; margin-bottom: 1.5rem; }
     .panel-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(201,169,110,0.1); display: flex; align-items: center; justify-content: space-between; }
     .panel-title { font-size: 0.62rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); }
     .panel-body { padding: 1.5rem; }
@@ -30,42 +30,65 @@
     .field label { display: block; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
     .field input { width: 100%; background: var(--navy); border: 1px solid rgba(201,169,110,0.15); border-radius: 2px; color: var(--cream); font-family: 'Montserrat', sans-serif; font-size: 0.82rem; font-weight: 300; padding: 0.7rem 0.9rem; outline: none; transition: border-color 0.2s; }
     .field input:focus { border-color: var(--gold); }
-    .upload-zone { border: 2px dashed rgba(201,169,110,0.2); border-radius: 2px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+    .upload-zone { border: 2px dashed rgba(201,169,110,0.2); border-radius: 2px; padding: 1.5rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
     .upload-zone:hover, .upload-zone.drag-over { border-color: var(--gold); background: rgba(201,169,110,0.04); }
     .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-    .upload-icon { font-size: 2rem; opacity: 0.3; margin-bottom: 0.75rem; }
     .upload-text { font-size: 0.7rem; letter-spacing: 0.1em; color: var(--text-muted); }
     .upload-hint { font-size: 0.6rem; color: rgba(138,155,176,0.5); margin-top: 0.4rem; }
-    .file-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 1rem; }
-    .file-thumb { width: 60px; height: 60px; object-fit: cover; border: 1px solid rgba(201,169,110,0.15); border-radius: 2px; }
-    .file-count { font-size: 0.65rem; color: var(--gold); margin-top: 0.75rem; letter-spacing: 0.1em; }
+    .file-preview { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.75rem; }
+    .file-thumb-wrap { position: relative; }
+    .file-thumb { width: 56px; height: 56px; object-fit: cover; border: 1px solid rgba(201,169,110,0.15); border-radius: 2px; display: block; }
+    .file-thumb-del { position: absolute; top: -5px; right: -5px; background: var(--danger); border: none; border-radius: 50%; width: 16px; height: 16px; color: white; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1; }
+    .file-count { font-size: 0.65rem; color: var(--gold); margin-top: 0.5rem; letter-spacing: 0.1em; }
     .progress-bar { height: 2px; background: rgba(201,169,110,0.15); border-radius: 1px; margin-top: 1rem; overflow: hidden; display: none; }
     .progress-fill { height: 100%; background: var(--gold); width: 0%; transition: width 0.3s; }
     .btn { display: inline-block; padding: 0.8rem 1.5rem; font-family: 'Montserrat', sans-serif; font-size: 0.62rem; font-weight: 400; letter-spacing: 0.25em; text-transform: uppercase; border-radius: 2px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
     .btn-primary { background: var(--gold); border-color: var(--gold); color: var(--navy); width: 100%; }
     .btn-primary:hover { background: #e2c99a; }
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-ghost { background: transparent; border-color: rgba(201,169,110,0.25); color: var(--text-muted); font-size: 0.58rem; }
+    .btn-ghost { background: transparent; border-color: rgba(201,169,110,0.25); color: var(--text-muted); font-size: 0.58rem; padding: 0.35rem 0.7rem; }
     .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
     .btn-danger { background: transparent; border-color: rgba(224,112,112,0.3); color: var(--danger); font-size: 0.58rem; padding: 0.35rem 0.7rem; }
     .btn-danger:hover { background: rgba(224,112,112,0.1); }
-    .msg { font-size: 0.7rem; letter-spacing: 0.05em; margin-top: 1rem; min-height: 1.2em; padding: 0.5rem 0; }
+    .btn-warning { background: transparent; border-color: rgba(201,169,110,0.3); color: var(--gold); font-size: 0.58rem; padding: 0.35rem 0.7rem; }
+    .btn-warning:hover { background: rgba(201,169,110,0.1); }
+    .msg { font-size: 0.7rem; letter-spacing: 0.05em; margin-top: 0.75rem; min-height: 1.2em; }
     .msg.success { color: var(--success); } .msg.error { color: var(--danger); } .msg.info { color: var(--text-muted); }
     .link-box { background: var(--navy); border: 1px solid rgba(201,169,110,0.2); border-radius: 2px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; margin-top: 0.75rem; }
-    .link-box code { flex: 1; font-size: 0.7rem; color: var(--gold); word-break: break-all; letter-spacing: 0.05em; }
+    .link-box code { flex: 1; font-size: 0.7rem; color: var(--gold); word-break: break-all; }
     .btn-copy { background: transparent; border: 1px solid rgba(201,169,110,0.25); border-radius: 2px; color: var(--text-muted); font-size: 0.6rem; padding: 0.35rem 0.6rem; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
     .btn-copy:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* Clients list */
     .clients-list { display: flex; flex-direction: column; gap: 2px; }
-    .client-row { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 0.75rem; padding: 0.85rem 1.25rem; background: var(--navy); border: 1px solid rgba(201,169,110,0.08); border-radius: 2px; transition: border-color 0.2s; }
-    .client-row:hover { border-color: rgba(201,169,110,0.2); }
-    .client-row.inactive { opacity: 0.4; }
+    .client-row { padding: 1rem 1.25rem; background: var(--navy); border: 1px solid rgba(201,169,110,0.08); border-radius: 2px; transition: border-color 0.2s; cursor: pointer; }
+    .client-row:hover { border-color: rgba(201,169,110,0.25); }
+    .client-row.inactive { opacity: 0.5; }
+    .client-row.selected { border-color: var(--gold); }
+    .client-row-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
     .client-nom { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-style: italic; }
-    .client-session { font-size: 0.62rem; color: var(--text-muted); letter-spacing: 0.05em; margin-top: 0.15rem; }
-    .client-photos { font-size: 0.62rem; color: var(--text-muted); letter-spacing: 0.1em; white-space: nowrap; }
+    .client-session { font-size: 0.62rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .client-meta { display: flex; align-items: center; gap: 0.5rem; }
+    .client-photos-count { font-size: 0.6rem; color: var(--text-muted); white-space: nowrap; }
     .badge-actif { font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 2px; }
     .badge-actif.on { color: var(--success); border: 1px solid rgba(110,201,169,0.3); }
     .badge-actif.off { color: var(--danger); border: 1px solid rgba(224,112,112,0.3); }
+    .client-actions { display: flex; gap: 0.4rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(201,169,110,0.08); }
     .empty-list { text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.12em; }
+
+    /* Edit panel */
+    .edit-panel { background: var(--navy-light); border: 1px solid rgba(201,169,110,0.2); border-radius: 2px; padding: 1.5rem; margin-top: 0.75rem; display: none; }
+    .edit-panel.open { display: block; }
+    .edit-section-title { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+    .edit-photos-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+    .edit-photo-wrap { position: relative; }
+    .edit-photo-img { width: 70px; height: 70px; object-fit: cover; border: 1px solid rgba(201,169,110,0.15); border-radius: 2px; display: block; }
+    .edit-photo-del { position: absolute; top: -5px; right: -5px; background: var(--danger); border: none; border-radius: 50%; width: 18px; height: 18px; color: white; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .edit-photo-del:hover { background: #c05050; }
+    .confirm-delete { background: rgba(224,112,112,0.1); border: 1px solid rgba(224,112,112,0.3); border-radius: 2px; padding: 1rem; margin-top: 1rem; display: none; }
+    .confirm-delete.open { display: block; }
+    .confirm-delete p { font-size: 0.72rem; color: var(--danger); margin-bottom: 0.75rem; letter-spacing: 0.05em; }
+    .confirm-delete .btns { display: flex; gap: 0.5rem; }
   </style>
 </head>
 <body>
@@ -89,8 +112,10 @@
 </div>
 
 <div id="adminApp">
+
+  <!-- Colonne gauche : Nouveau client -->
   <div>
-    <div class="panel" style="margin-bottom:1.5rem;">
+    <div class="panel">
       <div class="panel-header"><span class="panel-title">Nouveau client</span></div>
       <div class="panel-body">
         <div class="field">
@@ -105,7 +130,6 @@
           <label>Photos (JPEG, PNG — max 50)</label>
           <div class="upload-zone" id="uploadZone">
             <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple onchange="previewFiles(this.files)">
-            <div class="upload-icon">◻</div>
             <p class="upload-text">Glissez vos photos ici ou cliquez</p>
             <p class="upload-hint">JPEG · PNG · WebP</p>
           </div>
@@ -115,45 +139,50 @@
         <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
         <button class="btn btn-primary" id="createBtn" onclick="createClient()" style="margin-top:1rem;">Créer le client &amp; uploader</button>
         <p class="msg" id="createMsg"></p>
-        <div id="linkResult" style="display:none;">
+        <div id="linkResult" style="display:none;margin-top:1rem;">
           <p style="font-size:0.65rem;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.5rem;">Lien à envoyer au client :</p>
           <div class="link-box">
             <code id="linkCode"></code>
             <button class="btn-copy" onclick="copyLink()">Copier</button>
           </div>
-          <p style="font-size:0.6rem;color:var(--text-muted);margin-top:0.5rem;letter-spacing:0.05em;">
-            Code seul : <strong id="tokenDisplay" style="color:var(--gold);font-size:0.65rem;letter-spacing:0.15em;"></strong>
+          <p style="font-size:0.6rem;color:var(--text-muted);margin-top:0.5rem;">
+            Code : <strong id="tokenDisplay" style="color:var(--gold);letter-spacing:0.15em;"></strong>
           </p>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Colonne droite : Liste clients -->
   <div>
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Clients</span>
-        <button class="btn btn-ghost" onclick="loadClients()">↻ Actualiser</button>
+        <button class="btn-ghost" onclick="loadClients()">↻ Actualiser</button>
       </div>
       <div class="panel-body">
         <div class="clients-list" id="clientsList"><p class="empty-list">Chargement…</p></div>
       </div>
     </div>
   </div>
+
 </div>
 
 <script src="firebase-config.js"></script>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDocs, collection, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, getDocs, collection, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const ADMIN_PASSWORD = "db2025admin"; // ← CHANGE CE MOT DE PASSE
+  const ADMIN_PASSWORD = "samuel04";
   let selectedFiles = [];
   let generatedLink = '';
+  let currentEditToken = null;
+  let editAddFiles = [];
 
+  // ── LOGIN ──
   window.adminLogin = function() {
     const pwd = document.getElementById('adminPwd').value;
     if (pwd === ADMIN_PASSWORD) {
@@ -166,71 +195,78 @@
       m.textContent = 'Mot de passe incorrect.';
     }
   };
+  document.getElementById('adminPwd').addEventListener('keydown', e => { if(e.key==='Enter') window.adminLogin(); });
 
+  // ── FICHIERS NOUVEAU CLIENT ──
   window.previewFiles = function(files) {
     selectedFiles = Array.from(files).slice(0, 50);
+    renderNewPreview();
+  };
+
+  function renderNewPreview() {
     const preview = document.getElementById('filePreview');
-    const count = document.getElementById('fileCount');
     preview.innerHTML = '';
-    selectedFiles.forEach(f => {
+    selectedFiles.forEach((f, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'file-thumb-wrap';
       const img = document.createElement('img');
       img.className = 'file-thumb';
       img.src = URL.createObjectURL(f);
-      preview.appendChild(img);
+      const del = document.createElement('button');
+      del.className = 'file-thumb-del';
+      del.textContent = '✕';
+      del.onclick = () => { selectedFiles.splice(i, 1); renderNewPreview(); };
+      wrap.appendChild(img);
+      wrap.appendChild(del);
+      preview.appendChild(wrap);
     });
-    count.textContent = selectedFiles.length
+    document.getElementById('fileCount').textContent = selectedFiles.length
       ? selectedFiles.length + ' photo' + (selectedFiles.length > 1 ? 's' : '') + ' sélectionnée' + (selectedFiles.length > 1 ? 's' : '')
       : '';
-  };
+  }
 
   const zone = document.getElementById('uploadZone');
   zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
   zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
   zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); window.previewFiles(e.dataTransfer.files); });
 
+  // ── TOKEN ──
   function generateToken() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     const part = n => Array.from({length: n}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
     return `${part(4)}-${part(4)}-${part(4)}`;
   }
 
+  // ── CLOUDINARY UPLOAD ──
   async function uploadToCloudinary(file, token, index) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', cloudinaryConfig.uploadPreset);
     formData.append('folder', `album-poche/${token}`);
-    formData.append('public_id', `photo_${String(index).padStart(3,'0')}`);
-
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`,
-      { method: 'POST', body: formData }
-    );
+    formData.append('public_id', `photo_${String(index).padStart(3,'0')}_${Date.now()}`);
+    const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, { method: 'POST', body: formData });
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
     return data.secure_url;
   }
 
+  // ── CRÉER CLIENT ──
   window.createClient = async function() {
     const nom = document.getElementById('clientNom').value.trim();
     const session = document.getElementById('clientSession').value.trim();
     const msg = document.getElementById('createMsg');
     const btn = document.getElementById('createBtn');
-
     if (!nom) { msg.className='msg error'; msg.textContent='Nom du client requis.'; return; }
     if (selectedFiles.length === 0) { msg.className='msg error'; msg.textContent='Ajoutez au moins une photo.'; return; }
-
     btn.disabled = true;
     document.getElementById('linkResult').style.display = 'none';
     const progressBar = document.getElementById('progressBar');
     const progressFill = document.getElementById('progressFill');
     progressBar.style.display = 'block';
     progressFill.style.width = '0%';
-    msg.className = 'msg info';
-    msg.textContent = 'Upload des photos en cours…';
-
+    msg.className = 'msg info'; msg.textContent = 'Upload en cours…';
     const token = generateToken();
     const photoUrls = [];
-
     try {
       for (let i = 0; i < selectedFiles.length; i++) {
         msg.textContent = `Upload ${i+1}/${selectedFiles.length}…`;
@@ -238,23 +274,13 @@
         photoUrls.push(url);
         progressFill.style.width = Math.round(((i+1)/selectedFiles.length)*100) + '%';
       }
-
-      await setDoc(doc(db, 'clients', token), {
-        nom, session,
-        photos: photoUrls,
-        actif: true,
-        createdAt: new Date().toISOString()
-      });
-
-      msg.className = 'msg success';
-      msg.textContent = 'Client créé avec succès !';
-
+      await setDoc(doc(db, 'clients', token), { nom, session, photos: photoUrls, actif: true, createdAt: new Date().toISOString() });
+      msg.className = 'msg success'; msg.textContent = 'Client créé !';
       const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
       generatedLink = `${baseUrl}index.html?token=${token}`;
       document.getElementById('linkCode').textContent = generatedLink;
       document.getElementById('tokenDisplay').textContent = token;
       document.getElementById('linkResult').style.display = 'block';
-
       document.getElementById('clientNom').value = '';
       document.getElementById('clientSession').value = '';
       document.getElementById('filePreview').innerHTML = '';
@@ -262,65 +288,206 @@
       document.getElementById('fileInput').value = '';
       selectedFiles = [];
       loadClients();
-
-    } catch(e) {
-      console.error(e);
-      msg.className = 'msg error';
-      msg.textContent = 'Erreur : ' + e.message;
-    }
+    } catch(e) { msg.className='msg error'; msg.textContent='Erreur : '+e.message; }
     btn.disabled = false;
   };
 
   window.copyLink = function() {
     navigator.clipboard.writeText(generatedLink).then(() => {
-      const btn = document.querySelector('.btn-copy');
-      btn.textContent = '✓ Copié';
-      setTimeout(() => btn.textContent = 'Copier', 2000);
+      const btn = document.querySelector('#linkResult .btn-copy');
+      btn.textContent = '✓ Copié'; setTimeout(() => btn.textContent = 'Copier', 2000);
     });
   };
 
+  // ── LISTE CLIENTS ──
   window.loadClients = async function() {
     const list = document.getElementById('clientsList');
     list.innerHTML = '<p class="empty-list">Chargement…</p>';
     try {
       const snap = await getDocs(collection(db, 'clients'));
-      if (snap.empty) { list.innerHTML = '<p class="empty-list">Aucun client pour l\'instant</p>'; return; }
+      if (snap.empty) { list.innerHTML = '<p class="empty-list">Aucun client</p>'; return; }
       const clients = [];
       snap.forEach(d => clients.push({ id: d.id, ...d.data() }));
       clients.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
       list.innerHTML = '';
-      clients.forEach(c => {
-        const row = document.createElement('div');
-        row.className = 'client-row' + (c.actif === false ? ' inactive' : '');
-        row.innerHTML = `
-          <div>
-            <div class="client-nom">${c.nom}</div>
-            <div class="client-session">${c.session||''}</div>
-          </div>
-          <div class="client-photos">${(c.photos||[]).length} photo${(c.photos||[]).length>1?'s':''}</div>
+      clients.forEach(c => renderClientRow(c, list));
+    } catch(e) { list.innerHTML = `<p class="empty-list" style="color:var(--danger)">Erreur : ${e.message}</p>`; }
+  };
+
+  function renderClientRow(c, container) {
+    const row = document.createElement('div');
+    row.className = 'client-row' + (c.actif === false ? ' inactive' : '');
+    row.id = `row-${c.id}`;
+    row.innerHTML = `
+      <div class="client-row-top">
+        <div>
+          <div class="client-nom">${c.nom}</div>
+          <div class="client-session">${c.session||''}</div>
+        </div>
+        <div class="client-meta">
+          <span class="client-photos-count">${(c.photos||[]).length} photo${(c.photos||[]).length>1?'s':''}</span>
           <span class="badge-actif ${c.actif!==false?'on':'off'}">${c.actif!==false?'Actif':'Inactif'}</span>
-          <div style="display:flex;gap:0.4rem;">
-            <button class="btn btn-ghost" onclick="copyClientLink('${c.id}')" title="Copier le lien">🔗</button>
-            <button class="btn btn-danger" onclick="toggleClient('${c.id}',${c.actif!==false})">${c.actif!==false?'Désactiver':'Réactiver'}</button>
-          </div>`;
-        list.appendChild(row);
-      });
-    } catch(e) {
-      list.innerHTML = `<p class="empty-list" style="color:var(--danger)">Erreur : ${e.message}</p>`;
-    }
+        </div>
+      </div>
+      <div class="client-actions">
+        <button class="btn-ghost" onclick="toggleEdit('${c.id}')">✏️ Modifier</button>
+        <button class="btn-ghost" onclick="copyClientLink('${c.id}')">🔗 Lien</button>
+        <button class="btn-warning" onclick="toggleClient('${c.id}', ${c.actif!==false})">${c.actif!==false?'Désactiver':'Réactiver'}</button>
+        <button class="btn-danger" onclick="askDelete('${c.id}')">🗑 Supprimer</button>
+      </div>
+      <div class="confirm-delete" id="confirm-${c.id}">
+        <p>Supprimer définitivement ce client et toutes ses photos ?</p>
+        <div class="btns">
+          <button class="btn-danger" onclick="deleteClient('${c.id}')">Oui, supprimer</button>
+          <button class="btn-ghost" onclick="cancelDelete('${c.id}')">Annuler</button>
+        </div>
+      </div>
+      <div class="edit-panel" id="edit-${c.id}">
+        <p class="edit-section-title">Informations</p>
+        <div class="field" style="margin-bottom:0.75rem;">
+          <label>Nom</label>
+          <input type="text" id="edit-nom-${c.id}" value="${c.nom}">
+        </div>
+        <div class="field" style="margin-bottom:1rem;">
+          <label>Intitulé séance</label>
+          <input type="text" id="edit-session-${c.id}" value="${c.session||''}">
+        </div>
+        <button class="btn-ghost" style="margin-bottom:1.5rem;" onclick="saveInfos('${c.id}')">Enregistrer les infos</button>
+        <p class="msg" id="msg-info-${c.id}"></p>
+
+        <p class="edit-section-title" style="margin-top:1rem;">Photos actuelles</p>
+        <div class="edit-photos-grid" id="photos-grid-${c.id}">
+          ${(c.photos||[]).map((url,i) => `
+            <div class="edit-photo-wrap" id="photo-wrap-${c.id}-${i}">
+              <img class="edit-photo-img" src="${url.replace('/upload/','/upload/w_140,c_fill/')}">
+              <button class="edit-photo-del" onclick="removePhoto('${c.id}', ${i})">✕</button>
+            </div>`).join('')}
+        </div>
+        <p class="msg" id="msg-photos-${c.id}"></p>
+
+        <p class="edit-section-title" style="margin-top:1.25rem;">Ajouter des photos</p>
+        <div class="upload-zone" id="add-zone-${c.id}" style="margin-bottom:0.75rem;">
+          <input type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="previewAddFiles('${c.id}', this.files)">
+          <p class="upload-text">Glissez ou cliquez</p>
+        </div>
+        <div class="file-preview" id="add-preview-${c.id}"></div>
+        <div class="progress-bar" id="add-progress-${c.id}"><div class="progress-fill" id="add-fill-${c.id}"></div></div>
+        <button class="btn-ghost" style="margin-top:0.75rem;width:100%;" onclick="addPhotos('${c.id}')">Uploader les nouvelles photos</button>
+        <p class="msg" id="msg-add-${c.id}"></p>
+      </div>
+    `;
+    // Stocker les photos en mémoire pour cet item
+    row._photos = [...(c.photos||[])];
+    container.appendChild(row);
+  }
+
+  // ── TOGGLE EDIT ──
+  window.toggleEdit = function(token) {
+    const panel = document.getElementById(`edit-${token}`);
+    panel.classList.toggle('open');
   };
 
-  window.copyClientLink = function(token) {
-    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
-    navigator.clipboard.writeText(`${baseUrl}index.html?token=${token}`);
+  // ── SAUVEGARDER INFOS ──
+  window.saveInfos = async function(token) {
+    const nom = document.getElementById(`edit-nom-${token}`).value.trim();
+    const session = document.getElementById(`edit-session-${token}`).value.trim();
+    const msg = document.getElementById(`msg-info-${token}`);
+    msg.className='msg info'; msg.textContent='Enregistrement…';
+    try {
+      await updateDoc(doc(db, 'clients', token), { nom, session });
+      msg.className='msg success'; msg.textContent='Infos mises à jour !';
+      // Mettre à jour l'affichage
+      document.querySelector(`#row-${token} .client-nom`).textContent = nom;
+      document.querySelector(`#row-${token} .client-session`).textContent = session;
+    } catch(e) { msg.className='msg error'; msg.textContent='Erreur : '+e.message; }
   };
 
+  // ── SUPPRIMER UNE PHOTO ──
+  window.removePhoto = async function(token, index) {
+    const msg = document.getElementById(`msg-photos-${token}`);
+    msg.className='msg info'; msg.textContent='Suppression…';
+    try {
+      const snap = await (await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js")).getDoc(doc(db, 'clients', token));
+      const photos = [...(snap.data().photos||[])];
+      photos.splice(index, 1);
+      await updateDoc(doc(db, 'clients', token), { photos });
+      // Recharger la ligne
+      msg.className='msg success'; msg.textContent='Photo supprimée.';
+      setTimeout(() => loadClients(), 800);
+    } catch(e) { msg.className='msg error'; msg.textContent='Erreur : '+e.message; }
+  };
+
+  // ── AJOUTER DES PHOTOS ──
+  let addFilesMap = {};
+
+  window.previewAddFiles = function(token, files) {
+    addFilesMap[token] = Array.from(files);
+    const preview = document.getElementById(`add-preview-${token}`);
+    preview.innerHTML = '';
+    addFilesMap[token].forEach(f => {
+      const img = document.createElement('img');
+      img.className = 'file-thumb';
+      img.src = URL.createObjectURL(f);
+      img.style.marginRight = '6px';
+      preview.appendChild(img);
+    });
+  };
+
+  window.addPhotos = async function(token) {
+    const files = addFilesMap[token] || [];
+    const msg = document.getElementById(`msg-add-${token}`);
+    if (files.length === 0) { msg.className='msg error'; msg.textContent='Sélectionnez des photos.'; return; }
+    const progressBar = document.getElementById(`add-progress-${token}`);
+    const progressFill = document.getElementById(`add-fill-${token}`);
+    progressBar.style.display = 'block';
+    msg.className='msg info'; msg.textContent='Upload en cours…';
+    try {
+      const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const snap = await getDoc(doc(db, 'clients', token));
+      const existing = [...(snap.data().photos||[])];
+      const newUrls = [];
+      for (let i = 0; i < files.length; i++) {
+        msg.textContent = `Upload ${i+1}/${files.length}…`;
+        const url = await uploadToCloudinary(files[i], token, existing.length + i);
+        newUrls.push(url);
+        progressFill.style.width = Math.round(((i+1)/files.length)*100) + '%';
+      }
+      const allPhotos = [...existing, ...newUrls];
+      await updateDoc(doc(db, 'clients', token), { photos: allPhotos });
+      msg.className='msg success'; msg.textContent=`${newUrls.length} photo(s) ajoutée(s) !`;
+      addFilesMap[token] = [];
+      setTimeout(() => loadClients(), 800);
+    } catch(e) { msg.className='msg error'; msg.textContent='Erreur : '+e.message; }
+  };
+
+  // ── TOGGLE ACTIF ──
   window.toggleClient = async function(token, currentlyActive) {
     await updateDoc(doc(db, 'clients', token), { actif: !currentlyActive });
     loadClients();
   };
 
-  document.getElementById('adminPwd').addEventListener('keydown', e => { if(e.key==='Enter') window.adminLogin(); });
+  // ── SUPPRIMER CLIENT ──
+  window.askDelete = function(token) {
+    document.getElementById(`confirm-${token}`).classList.add('open');
+  };
+  window.cancelDelete = function(token) {
+    document.getElementById(`confirm-${token}`).classList.remove('open');
+  };
+  window.deleteClient = async function(token) {
+    try {
+      await deleteDoc(doc(db, 'clients', token));
+      loadClients();
+    } catch(e) { alert('Erreur : ' + e.message); }
+  };
+
+  // ── COPIER LIEN ──
+  window.copyClientLink = function(token) {
+    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
+    const link = `${baseUrl}index.html?token=${token}`;
+    navigator.clipboard.writeText(link).then(() => alert('Lien copié !'));
+  };
+
+  loadClients();
 </script>
 </body>
 </html>
