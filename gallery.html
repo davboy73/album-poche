@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ma Galerie — David Boyer Photographe</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
   <style>
@@ -36,7 +38,8 @@
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .lightbox { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(14,27,42,0.97); align-items: center; justify-content: center; flex-direction: column; }
     .lightbox.open { display: flex; }
-    .lightbox img { max-width: 90vw; max-height: 82vh; object-fit: contain; display: block; pointer-events: none; border: 1px solid rgba(201,169,110,0.1); }
+    .lightbox img { max-width: 90vw; max-height: 82vh; object-fit: contain; display: block; pointer-events: none; border: 1px solid rgba(201,169,110,0.1); transition: opacity 0.25s ease; }
+    .lightbox img.fading { opacity: 0; }
     .lightbox-close { position: absolute; top: 1.25rem; right: 1.5rem; background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
     .lightbox-close:hover { color: var(--cream); }
     .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(14,27,42,0.7); border: 1px solid rgba(201,169,110,0.2); border-radius: 2px; color: var(--gold); font-size: 1.2rem; padding: 0.6rem 0.9rem; cursor: pointer; transition: all 0.2s; z-index: 10; }
@@ -156,8 +159,31 @@
   }
 
   function updateLightbox() {
-    document.getElementById('lbImg').src = photos[currentIndex];
+    const img = document.getElementById('lbImg');
+    img.classList.add('fading');
+    setTimeout(() => {
+      img.src = photos[currentIndex];
+      img.onload = () => img.classList.remove('fading');
+      img.classList.remove('fading');
+    }, 200);
     document.getElementById('lbCounter').textContent = `${currentIndex+1} / ${photos.length}`;
+  }
+
+  // ── COMPTEUR DE VUES ──
+  async function recordView(token) {
+    try {
+      const data = await fsGet('clients', token);
+      const vues = (parseInt(data.vues) || 0) + 1;
+      const derniereVisite = new Date().toISOString();
+      await fetch(`${BASE}/clients/${token}?key=${API_KEY}&updateMask.fieldPaths=vues&updateMask.fieldPaths=derniereVisite`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fields: {
+          vues: { integerValue: vues },
+          derniereVisite: { stringValue: derniereVisite }
+        }})
+      });
+    } catch(e) { console.log('Vue non enregistrée', e); }
   }
 
   window.closeLightbox = function(e) { if (e.target === document.getElementById('lightbox')) closeLightboxBtn(); };
@@ -174,6 +200,7 @@
   window.logout = function() { sessionStorage.clear(); window.location.href = 'index.html'; };
 
   loadGallery();
+  recordView(token);
 </script>
 
 <!-- Footer -->
