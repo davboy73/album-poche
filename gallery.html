@@ -38,8 +38,10 @@
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .lightbox { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(14,27,42,0.97); align-items: center; justify-content: center; flex-direction: column; }
     .lightbox.open { display: flex; }
-    .lightbox img { max-width: 90vw; max-height: 82vh; object-fit: contain; display: block; pointer-events: none; border: 1px solid rgba(201,169,110,0.1); transition: opacity 0.25s ease; }
-    .lightbox img.fading { opacity: 0; }
+    .lightbox-img-container { position: relative; max-width: 90vw; max-height: 82vh; overflow: hidden; }
+    .lightbox img { max-width: 90vw; max-height: 82vh; object-fit: contain; display: block; pointer-events: none; border: 1px solid rgba(201,169,110,0.1); transition: transform 0.35s ease, opacity 0.35s ease; }
+    .lightbox img.slide-left { transform: translateX(-60px); opacity: 0; }
+    .lightbox img.slide-right { transform: translateX(60px); opacity: 0; }
     .lightbox-close { position: absolute; top: 1.25rem; right: 1.5rem; background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
     .lightbox-close:hover { color: var(--cream); }
     .lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(14,27,42,0.7); border: 1px solid rgba(201,169,110,0.2); border-radius: 2px; color: var(--gold); font-size: 1.2rem; padding: 0.6rem 0.9rem; cursor: pointer; transition: all 0.2s; z-index: 10; }
@@ -158,14 +160,26 @@
     document.body.style.overflow = 'hidden';
   }
 
-  function updateLightbox() {
+  let isAnimating = false;
+
+  function updateLightbox(dir = 0) {
+    if (isAnimating) return;
+    isAnimating = true;
     const img = document.getElementById('lbImg');
-    img.classList.add('fading');
+    const outClass = dir >= 0 ? 'slide-left' : 'slide-right';
+    const inClass = dir >= 0 ? 'slide-right' : 'slide-left';
+    img.classList.add(outClass);
     setTimeout(() => {
       img.src = photos[currentIndex];
-      img.onload = () => img.classList.remove('fading');
-      img.classList.remove('fading');
-    }, 200);
+      img.classList.remove(outClass);
+      img.classList.add(inClass);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          img.classList.remove(inClass);
+          isAnimating = false;
+        });
+      });
+    }, 300);
     document.getElementById('lbCounter').textContent = `${currentIndex+1} / ${photos.length}`;
   }
 
@@ -190,12 +204,12 @@
 
   window.closeLightbox = function(e) { if (e.target === document.getElementById('lightbox')) closeLightboxBtn(); };
   window.closeLightboxBtn = function() { document.getElementById('lightbox').classList.remove('open'); document.body.style.overflow = ''; };
-  window.navLightbox = function(dir, e) { e.stopPropagation(); currentIndex = (currentIndex+dir+photos.length)%photos.length; updateLightbox(); };
+  window.navLightbox = function(dir, e) { e.stopPropagation(); currentIndex = (currentIndex+dir+photos.length)%photos.length; updateLightbox(dir); };
 
   document.addEventListener('keydown', e => {
     if (!document.getElementById('lightbox').classList.contains('open')) return;
-    if (e.key==='ArrowRight') { currentIndex = (currentIndex+1)%photos.length; updateLightbox(); }
-    if (e.key==='ArrowLeft') { currentIndex = (currentIndex-1+photos.length)%photos.length; updateLightbox(); }
+    if (e.key==='ArrowRight') { currentIndex = (currentIndex+1)%photos.length; updateLightbox(1); }
+    if (e.key==='ArrowLeft') { currentIndex = (currentIndex-1+photos.length)%photos.length; updateLightbox(-1); }
     if (e.key==='Escape') closeLightboxBtn();
   });
 
