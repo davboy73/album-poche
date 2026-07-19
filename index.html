@@ -184,8 +184,7 @@
 
 <div class="container">
   <div class="logo-area">
-    <div class="logo-initials">DB</div>
-    <div class="logo-name">David Boyer · Photographe</div>
+    <img src="logo.png" alt="David Boyer Photographe" style="height:80px;width:auto;filter:brightness(0) invert(1);opacity:0.85;margin-bottom:0.5rem;">
   </div>
 
   <div class="divider"></div>
@@ -205,12 +204,25 @@
 
 <!-- Firebase -->
 <script src="firebase-config.js"></script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script>
+  const PROJECT_ID = firebaseConfig.projectId;
+  const API_KEY = firebaseConfig.apiKey;
+  const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  async function fsGet(col, id) {
+    const r = await fetch(`${BASE}/${col}/${id}?key=${API_KEY}`);
+    if (r.status === 404) return null;
+    if (!r.ok) throw new Error('Erreur réseau');
+    const doc = await r.json();
+    const fields = doc.fields || {};
+    const result = {};
+    for (const [k, v] of Object.entries(fields)) {
+      if (v.stringValue !== undefined) result[k] = v.stringValue;
+      else if (v.booleanValue !== undefined) result[k] = v.booleanValue;
+      else if (v.arrayValue !== undefined) result[k] = (v.arrayValue.values||[]).map(i=>i.stringValue||'');
+    }
+    return result;
+  }
 
   // Vérification token depuis URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -236,17 +248,15 @@
     msg.textContent = 'Vérification en cours…';
 
     try {
-      const ref = doc(db, 'clients', raw);
-      const snap = await getDoc(ref);
+      const data = await fsGet('clients', raw);
 
-      if (!snap.exists()) {
+      if (!data) {
         msg.className = 'message error';
         msg.textContent = 'Code invalide. Vérifiez votre email.';
         btn.disabled = false;
         return;
       }
 
-      const data = snap.data();
       if (data.actif === false) {
         msg.className = 'message error';
         msg.textContent = 'Cet accès a expiré. Contactez le photographe.';
@@ -254,7 +264,6 @@
         return;
       }
 
-      // Stocker en session et rediriger
       sessionStorage.setItem('albumToken', raw);
       sessionStorage.setItem('albumClient', JSON.stringify(data));
       window.location.href = 'gallery.html';

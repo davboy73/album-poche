@@ -32,7 +32,7 @@
     .grid-item:hover img { transform: scale(1.02); opacity: 1; }
     .grid-item-overlay { position: absolute; inset: 0; background: rgba(14,27,42,0); transition: background 0.3s; }
     .grid-item:hover .grid-item-overlay { background: rgba(14,27,42,0.1); }
-    .skeleton { background: linear-gradient(90deg, var(--navy-light) 25%, var(--navy-mid) 50%, var(--navy-light) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+    .skeleton { background: linear-gradient(90deg, var(--navy-light) 25%, var(--navy-mid) 50%, var(--navy-light) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; height: 200px; }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .lightbox { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(14,27,42,0.97); align-items: center; justify-content: center; flex-direction: column; }
     .lightbox.open { display: flex; }
@@ -45,14 +45,12 @@
     .lightbox-counter { margin-top: 1.25rem; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
     .state-center { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 40vh; gap: 1rem; color: var(--text-muted); }
     .state-text { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; }
-    @media (max-width: 600px) { header { padding: 0.75rem 1rem; } .grid { padding: 0 0.25rem 2rem; gap: 2px; } }
   </style>
 </head>
 <body>
 <header>
-  <div style="display:flex;align-items:baseline;">
-    <span class="header-initials">DB</span>
-    <span class="header-name">David Boyer · Photographe</span>
+  <div style="display:flex;align-items:center;">
+    <img src="logo.png" alt="David Boyer Photographe" style="height:36px;width:auto;filter:brightness(0) invert(1);opacity:0.85;">
   </div>
   <div>
     <div class="header-client-name" id="clientName">—</div>
@@ -78,15 +76,32 @@
 </div>
 
 <script src="firebase-config.js"></script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script>
+  // ── FIRESTORE REST API ──
+  const PROJECT_ID = firebaseConfig.projectId;
+  const API_KEY = firebaseConfig.apiKey;
+  const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
+  async function fsGet(collection, id) {
+    const r = await fetch(`${BASE}/${collection}/${id}?key=${API_KEY}`);
+    if (!r.ok) throw new Error('Document introuvable');
+    return fsParseDoc(await r.json());
+  }
+
+  function fsParseDoc(doc) {
+    const fields = doc.fields || {};
+    const result = {};
+    for (const [k, v] of Object.entries(fields)) {
+      if (v.stringValue !== undefined) result[k] = v.stringValue;
+      else if (v.booleanValue !== undefined) result[k] = v.booleanValue;
+      else if (v.arrayValue !== undefined) result[k] = (v.arrayValue.values || []).map(i => i.stringValue || '');
+    }
+    return result;
+  }
+
+  // Auth check
   const token = sessionStorage.getItem('albumToken');
   if (!token) { window.location.href = 'index.html'; }
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
 
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('keydown', e => { if ((e.ctrlKey||e.metaKey) && ['s','u','p'].includes(e.key.toLowerCase())) e.preventDefault(); });
@@ -103,27 +118,22 @@
       grid.appendChild(sk);
     }
     try {
-      const snap = await getDoc(doc(db, 'clients', token));
-      if (!snap.exists()) { window.location.href = 'index.html'; return; }
-      const data = snap.data();
-      const photoUrls = data.photos || [];
+      const data = await fsGet('clients', token);
 
       document.getElementById('clientName').textContent = data.nom || '—';
       document.getElementById('sessionLabel').textContent = data.session || '';
+      const photoUrls = data.photos || [];
       document.getElementById('clientCount').textContent = photoUrls.length + (photoUrls.length > 1 ? ' photos' : ' photo');
 
       grid.innerHTML = '';
       if (photoUrls.length === 0) {
-        grid.innerHTML = `<div class="state-center" style="grid-column:1/-1"><p class="state-text">Votre galerie sera disponible prochainement</p></div>`;
+        grid.innerHTML = `<div class="state-center"><p class="state-text">Votre galerie sera disponible prochainement</p></div>`;
         return;
       }
 
-      // Les URLs Cloudinary sont directes — pas besoin de token signé
-      // On ajoute fl_attachment:false pour empêcher le téléchargement natif
-      photos = photoUrls.map(url => url.replace('/upload/', '/upload/fl_attachment:false/'));
+      photos = photoUrls;
 
       photoUrls.forEach((url, i) => {
-        // Miniature via Cloudinary (resize auto)
         const thumbUrl = url.replace('/upload/', '/upload/w_600,q_auto,f_auto/');
         const item = document.createElement('div');
         item.className = 'grid-item';
@@ -134,16 +144,16 @@
 
     } catch(e) {
       console.error(e);
-      grid.innerHTML = `<div class="state-center" style="grid-column:1/-1"><p class="state-text">Erreur de chargement — réessayez</p></div>`;
+      grid.innerHTML = `<div class="state-center"><p class="state-text">Erreur de chargement — réessayez</p></div>`;
     }
   }
 
-  window.openLightbox = function(i) {
+  function openLightbox(i) {
     currentIndex = i;
     updateLightbox();
     document.getElementById('lightbox').classList.add('open');
     document.body.style.overflow = 'hidden';
-  };
+  }
 
   function updateLightbox() {
     document.getElementById('lbImg').src = photos[currentIndex];
@@ -156,8 +166,8 @@
 
   document.addEventListener('keydown', e => {
     if (!document.getElementById('lightbox').classList.contains('open')) return;
-    if (e.key==='ArrowRight') navLightbox(1,{stopPropagation:()=>{}});
-    if (e.key==='ArrowLeft') navLightbox(-1,{stopPropagation:()=>{}});
+    if (e.key==='ArrowRight') { currentIndex = (currentIndex+1)%photos.length; updateLightbox(); }
+    if (e.key==='ArrowLeft') { currentIndex = (currentIndex-1+photos.length)%photos.length; updateLightbox(); }
     if (e.key==='Escape') closeLightboxBtn();
   });
 
