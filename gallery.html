@@ -172,14 +172,16 @@
   // ── COMPTEUR DE VUES ──
   async function recordView(token) {
     try {
-      const data = await fsGet('clients', token);
-      const vues = (parseInt(data.vues) || 0) + 1;
+      // Lire d'abord le nombre de vues actuel
+      const r = await fetch(`${BASE}/clients/${token}?key=${API_KEY}`);
+      const doc = await r.json();
+      const currentVues = doc.fields?.vues?.integerValue ? parseInt(doc.fields.vues.integerValue) : 0;
       const derniereVisite = new Date().toISOString();
       await fetch(`${BASE}/clients/${token}?key=${API_KEY}&updateMask.fieldPaths=vues&updateMask.fieldPaths=derniereVisite`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fields: {
-          vues: { integerValue: vues },
+          vues: { integerValue: String(currentVues + 1) },
           derniereVisite: { stringValue: derniereVisite }
         }})
       });
