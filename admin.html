@@ -85,6 +85,11 @@
     .edit-photo-img { width: 70px; height: 70px; object-fit: cover; border: 1px solid rgba(201,169,110,0.15); border-radius: 2px; display: block; }
     .edit-photo-del { position: absolute; top: -5px; right: -5px; background: var(--danger); border: none; border-radius: 50%; width: 18px; height: 18px; color: white; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
     .edit-photo-del:hover { background: #c05050; }
+    .edit-photo-dl { position: absolute; bottom: -5px; right: -5px; background: var(--gold); border: none; border-radius: 50%; width: 18px; height: 18px; color: var(--navy); font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; }
+    .edit-photo-dl:hover { background: #e2c99a; }
+    .btn-zip { background: rgba(201,169,110,0.1); border: 1px solid rgba(201,169,110,0.3); border-radius: 2px; color: var(--gold); font-family: 'Montserrat',sans-serif; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.2s; width: 100%; margin-bottom: 0.75rem; }
+    .btn-zip:hover { background: rgba(201,169,110,0.2); }
+    .btn-zip:disabled { opacity: 0.4; cursor: not-allowed; }
     .confirm-delete { background: rgba(224,112,112,0.1); border: 1px solid rgba(224,112,112,0.3); border-radius: 2px; padding: 1rem; margin-top: 1rem; display: none; }
     .confirm-delete.open { display: block; }
     .confirm-delete p { font-size: 0.72rem; color: var(--danger); margin-bottom: 0.75rem; letter-spacing: 0.05em; }
@@ -356,11 +361,13 @@
         <p class="msg" id="msg-info-${c.id}"></p>
 
         <p class="edit-section-title" style="margin-top:1rem;">Photos actuelles</p>
+        <button class="btn-zip" id="zip-btn-${c.id}" onclick="downloadZip('${c.id}')">⬇ Télécharger toutes les photos (ZIP)</button>
         <div class="edit-photos-grid" id="photos-grid-${c.id}">
           ${(c.photos||[]).map((url,i) => `
             <div class="edit-photo-wrap" id="photo-wrap-${c.id}-${i}">
               <img class="edit-photo-img" src="${url.replace('/upload/','/upload/w_140,c_fill/')}">
               <button class="edit-photo-del" onclick="removePhoto('${c.id}', ${i})">✕</button>
+              <a class="edit-photo-dl" href="${url}" download target="_blank" title="Télécharger">⬇</a>
             </div>`).join('')}
         </div>
         <p class="msg" id="msg-photos-${c.id}"></p>
@@ -380,6 +387,54 @@
     row._photos = [...(c.photos||[])];
     container.appendChild(row);
   }
+
+  // ── TÉLÉCHARGER ZIP ──
+  window.downloadZip = async function(token) {
+    const btn = document.getElementById(`zip-btn-${token}`);
+    btn.disabled = true;
+    btn.textContent = '⏳ Préparation du ZIP…';
+    try {
+      const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const snap = await getDoc(doc(db, 'clients', token));
+      const photos = snap.data().photos || [];
+      const nom = (snap.data().nom || 'client').replace(/\s+/g, '_');
+
+      // Charger JSZip depuis CDN
+      if (!window.JSZip) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+
+      const zip = new window.JSZip();
+      const folder = zip.folder(nom);
+
+      for (let i = 0; i < photos.length; i++) {
+        btn.textContent = `⏳ Téléchargement ${i+1}/${photos.length}…`;
+        const url = photos[i];
+        const ext = url.split('?')[0].split('.').pop() || 'jpg';
+        const resp = await fetch(url);
+        const blob = await resp.blob();
+        folder.file(`photo_${String(i+1).padStart(3,'0')}.${ext}`, blob);
+      }
+
+      btn.textContent = '⏳ Génération ZIP…';
+      const content = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(content);
+      a.download = `${nom}.zip`;
+      a.click();
+      btn.textContent = '✓ ZIP téléchargé !';
+      setTimeout(() => { btn.textContent = '⬇ Télécharger toutes les photos (ZIP)'; btn.disabled = false; }, 3000);
+    } catch(e) {
+      btn.textContent = '⬇ Télécharger toutes les photos (ZIP)';
+      btn.disabled = false;
+      alert('Erreur ZIP : ' + e.message);
+    }
+  };
 
   // ── TOGGLE EDIT ──
   window.toggleEdit = function(token) {
