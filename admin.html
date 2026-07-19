@@ -412,6 +412,7 @@
       <div class="client-actions">
         <button class="btn-ghost" onclick="toggleEdit('${c.id}')">✏️ Modifier</button>
         <button class="btn-ghost" onclick="copyClientLink('${c.id}')">🔗 Lien</button>
+        <button class="btn-ghost" onclick="sendEmail('${c.id}', '${c.nom}')">✉️ Email</button>
         <button class="btn-warning" onclick="toggleClient('${c.id}', ${c.actif!==false})">${c.actif!==false?'Désactiver':'Réactiver'}</button>
         <button class="btn-danger" onclick="askDelete('${c.id}')">🗑 Supprimer</button>
       </div>
@@ -660,6 +661,27 @@
       await fsDelete('clients', token);
       loadClients();
     } catch(e) { alert('Erreur : ' + e.message); }
+  };
+
+  window.sendEmail = function(token, nom) {
+    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
+    const lien = `${baseUrl}index.html?token=${token}`;
+    const sujet = encodeURIComponent(`Vos photos sont disponibles — David Boyer Photographe`);
+    const corps = encodeURIComponent(
+`Bonjour ${nom},
+
+Vos photos sont prêtes ! Vous pouvez les consulter en cliquant sur le lien ci-dessous :
+
+${lien}
+
+Ce lien vous est personnel et vous permet d'accéder à votre galerie privée.
+
+À bientôt,
+David Boyer Photographe
+contact@david-boyer-photographe.com
+www.david-boyer-photographe.fr`
+    );
+    window.location.href = `mailto:?subject=${sujet}&body=${corps}`;
   };
 
   // ── COPIER LIEN ──
