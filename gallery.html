@@ -24,12 +24,14 @@
     .gallery-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; font-style: italic; color: var(--cream); }
     .gallery-subtitle { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.5rem; }
     .divider { width: 30px; height: 1px; background: var(--gold); margin: 1.5rem auto; opacity: 0.4; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 3px; padding: 0 2rem 3rem; max-width: 1200px; margin: 0 auto; }
-    .grid-item { position: relative; aspect-ratio: 3/2; overflow: hidden; cursor: pointer; background: var(--navy-light); }
-    .grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.4s ease; pointer-events: none; }
-    .grid-item:hover img { transform: scale(1.04); }
+    .grid { columns: 3; column-gap: 4px; padding: 0 2rem 3rem; max-width: 1200px; margin: 0 auto; }
+    @media (max-width: 900px) { .grid { columns: 2; } }
+    @media (max-width: 500px) { .grid { columns: 1; padding: 0 0.5rem 2rem; } }
+    .grid-item { position: relative; break-inside: avoid; margin-bottom: 4px; cursor: pointer; background: #000; overflow: hidden; }
+    .grid-item img { width: 100%; height: auto; display: block; transition: transform 0.4s ease, opacity 0.3s; pointer-events: none; opacity: 0.92; }
+    .grid-item:hover img { transform: scale(1.02); opacity: 1; }
     .grid-item-overlay { position: absolute; inset: 0; background: rgba(14,27,42,0); transition: background 0.3s; }
-    .grid-item:hover .grid-item-overlay { background: rgba(14,27,42,0.2); }
+    .grid-item:hover .grid-item-overlay { background: rgba(14,27,42,0.1); }
     .skeleton { background: linear-gradient(90deg, var(--navy-light) 25%, var(--navy-mid) 50%, var(--navy-light) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     .lightbox { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(14,27,42,0.97); align-items: center; justify-content: center; flex-direction: column; }
@@ -122,7 +124,7 @@
 
       photoUrls.forEach((url, i) => {
         // Miniature via Cloudinary (resize auto)
-        const thumbUrl = url.replace('/upload/', '/upload/w_400,c_fill,q_auto,f_auto/');
+        const thumbUrl = url.replace('/upload/', '/upload/w_600,q_auto,f_auto/');
         const item = document.createElement('div');
         item.className = 'grid-item';
         item.innerHTML = `<img src="${thumbUrl}" alt="Photo ${i+1}" loading="lazy"><div class="grid-item-overlay"></div>`;
