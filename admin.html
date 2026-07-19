@@ -238,6 +238,7 @@
     for (const [k, v] of Object.entries(fields)) {
       if (v.stringValue !== undefined) result[k] = v.stringValue;
       else if (v.booleanValue !== undefined) result[k] = v.booleanValue;
+      else if (v.integerValue !== undefined) result[k] = parseInt(v.integerValue);
       else if (v.arrayValue !== undefined) result[k] = (v.arrayValue.values || []).map(i => i.stringValue || '');
       else if (v.timestampValue !== undefined) result[k] = v.timestampValue;
     }
