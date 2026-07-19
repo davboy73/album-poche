@@ -90,6 +90,15 @@
     .btn-zip { background: rgba(201,169,110,0.1); border: 1px solid rgba(201,169,110,0.3); border-radius: 2px; color: var(--gold); font-family: 'Montserrat',sans-serif; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.2s; width: 100%; margin-bottom: 0.75rem; }
     .btn-zip:hover { background: rgba(201,169,110,0.2); }
     .btn-zip:disabled { opacity: 0.4; cursor: not-allowed; }
+    /* Drag & drop reorder */
+    .edit-photos-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 1rem; }
+    .edit-photo-wrap { position: relative; cursor: grab; transition: opacity 0.2s, transform 0.2s; }
+    .edit-photo-wrap:active { cursor: grabbing; }
+    .edit-photo-wrap.dragging { opacity: 0.4; transform: scale(0.95); }
+    .edit-photo-wrap.drag-over-item { border: 2px solid var(--gold); border-radius: 2px; }
+    .drag-hint { font-size: 0.58rem; color: var(--text-muted); letter-spacing: 0.1em; margin-bottom: 0.5rem; opacity: 0.7; }
+    .btn-save-order { background: rgba(110,201,169,0.1); border: 1px solid rgba(110,201,169,0.3); border-radius: 2px; color: var(--success); font-family: 'Montserrat',sans-serif; font-size: 0.6rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.2s; width: 100%; margin-bottom: 0.75rem; display: none; }
+    .btn-save-order:hover { background: rgba(110,201,169,0.2); }
     .confirm-delete { background: rgba(224,112,112,0.1); border: 1px solid rgba(224,112,112,0.3); border-radius: 2px; padding: 1rem; margin-top: 1rem; display: none; }
     .confirm-delete.open { display: block; }
     .confirm-delete p { font-size: 0.72rem; color: var(--danger); margin-bottom: 0.75rem; letter-spacing: 0.05em; }
@@ -361,10 +370,12 @@
         <p class="msg" id="msg-info-${c.id}"></p>
 
         <p class="edit-section-title" style="margin-top:1rem;">Photos actuelles</p>
+        <p class="drag-hint">↔ Glissez les photos pour les réordonner</p>
+        <button class="btn-save-order" id="save-order-${c.id}" onclick="saveOrder('${c.id}')">✓ Enregistrer l'ordre</button>
         <button class="btn-zip" id="zip-btn-${c.id}" onclick="downloadZip('${c.id}')">⬇ Télécharger toutes les photos (ZIP)</button>
         <div class="edit-photos-grid" id="photos-grid-${c.id}">
           ${(c.photos||[]).map((url,i) => `
-            <div class="edit-photo-wrap" id="photo-wrap-${c.id}-${i}">
+            <div class="edit-photo-wrap" id="photo-wrap-${c.id}-${i}" draggable="true" data-index="${i}" data-token="${c.id}">
               <img class="edit-photo-img" src="${url.replace('/upload/','/upload/w_140,c_fill/')}">
               <button class="edit-photo-del" onclick="removePhoto('${c.id}', ${i})">✕</button>
               <a class="edit-photo-dl" href="${url}" download target="_blank" title="Télécharger">⬇</a>
@@ -386,7 +397,73 @@
     // Stocker les photos en mémoire pour cet item
     row._photos = [...(c.photos||[])];
     container.appendChild(row);
+    // Init drag & drop
+    initDragDrop(c.id, c.photos||[]);
   }
+
+  // ── DRAG & DROP REORDER ──
+  let dragSrc = null;
+  let dragToken = null;
+  let photoOrderMap = {}; // token -> [urls]
+
+  function initDragDrop(token, photos) {
+    photoOrderMap[token] = [...photos];
+    const grid = document.getElementById(`photos-grid-${token}`);
+    if (!grid) return;
+    const items = grid.querySelectorAll('.edit-photo-wrap');
+    items.forEach(item => {
+      item.addEventListener('dragstart', e => {
+        dragSrc = item;
+        dragToken = token;
+        setTimeout(() => item.classList.add('dragging'), 0);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      item.addEventListener('dragend', () => {
+        item.classList.remove('dragging');
+        grid.querySelectorAll('.edit-photo-wrap').forEach(i => i.classList.remove('drag-over-item'));
+      });
+      item.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        if (item !== dragSrc) {
+          grid.querySelectorAll('.edit-photo-wrap').forEach(i => i.classList.remove('drag-over-item'));
+          item.classList.add('drag-over-item');
+        }
+      });
+      item.addEventListener('drop', e => {
+        e.preventDefault();
+        if (dragSrc && item !== dragSrc && dragToken === token) {
+          // Réordonner dans le DOM
+          const allItems = [...grid.querySelectorAll('.edit-photo-wrap')];
+          const srcIdx = allItems.indexOf(dragSrc);
+          const tgtIdx = allItems.indexOf(item);
+          if (srcIdx < tgtIdx) grid.insertBefore(dragSrc, item.nextSibling);
+          else grid.insertBefore(dragSrc, item);
+          item.classList.remove('drag-over-item');
+          // Mettre à jour l'ordre en mémoire
+          const newOrder = [...grid.querySelectorAll('.edit-photo-wrap')].map(el => {
+            const idx = parseInt(el.dataset.index);
+            return photoOrderMap[token][idx];
+          });
+          photoOrderMap[token] = newOrder;
+          // Montrer le bouton sauvegarder
+          document.getElementById(`save-order-${token}`).style.display = 'block';
+        }
+      });
+    });
+  }
+
+  window.saveOrder = async function(token) {
+    const msg = document.getElementById(`msg-photos-${token}`);
+    const btn = document.getElementById(`save-order-${token}`);
+    msg.className = 'msg info'; msg.textContent = 'Enregistrement de l\'ordre…';
+    try {
+      await updateDoc(doc(db, 'clients', token), { photos: photoOrderMap[token] });
+      msg.className = 'msg success'; msg.textContent = 'Ordre enregistré !';
+      btn.style.display = 'none';
+      setTimeout(() => { msg.textContent = ''; }, 2000);
+    } catch(e) { msg.className = 'msg error'; msg.textContent = 'Erreur : ' + e.message; }
+  };
 
   // ── TÉLÉCHARGER ZIP ──
   window.downloadZip = async function(token) {

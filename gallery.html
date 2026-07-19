@@ -120,13 +120,6 @@
 
       // Les URLs Cloudinary sont directes — pas besoin de token signé
       // On ajoute fl_attachment:false pour empêcher le téléchargement natif
-      // Trier par ordre alphabétique du nom de fichier
-      photoUrls.sort((a, b) => {
-        const nameA = a.split('/').pop().split('?')[0].toLowerCase();
-        const nameB = b.split('/').pop().split('?')[0].toLowerCase();
-        return nameA.localeCompare(nameB);
-      });
-
       photos = photoUrls.map(url => url.replace('/upload/', '/upload/fl_attachment:false/'));
 
       photoUrls.forEach((url, i) => {
