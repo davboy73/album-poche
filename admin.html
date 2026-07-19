@@ -183,18 +183,75 @@
 </div>
 
 <script src="firebase-config.js"></script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, getDocs, collection, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<script>
+  // ── FIRESTORE REST API (compatible Safari) ──
+  const PROJECT_ID = firebaseConfig.projectId;
+  const API_KEY = firebaseConfig.apiKey;
+  const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  async function fsGet(collection, id) {
+    const r = await fetch(`${BASE}/${collection}/${id}?key=${API_KEY}`);
+    if (!r.ok) throw new Error('Document introuvable');
+    return fsParseDoc(await r.json());
+  }
+
+  async function fsList(collection) {
+    const r = await fetch(`${BASE}/${collection}?key=${API_KEY}`);
+    if (!r.ok) throw new Error('Erreur liste');
+    const data = await r.json();
+    if (!data.documents) return [];
+    return data.documents.map(d => ({ id: d.name.split('/').pop(), ...fsParseDoc(d) }));
+  }
+
+  async function fsSet(collection, id, obj) {
+    const body = { fields: fsEncodeFields(obj) };
+    const r = await fetch(`${BASE}/${collection}/${id}?key=${API_KEY}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!r.ok) throw new Error((await r.json()).error?.message || 'Erreur écriture');
+  }
+
+  async function fsUpdate(collection, id, obj) {
+    const fields = fsEncodeFields(obj);
+    const updateMask = Object.keys(fields).map(k => `updateMask.fieldPaths=${k}`).join('&');
+    const r = await fetch(`${BASE}/${collection}/${id}?key=${API_KEY}&${updateMask}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields })
+    });
+    if (!r.ok) throw new Error((await r.json()).error?.message || 'Erreur mise à jour');
+  }
+
+  async function fsDelete(collection, id) {
+    const r = await fetch(`${BASE}/${collection}/${id}?key=${API_KEY}`, { method: 'DELETE' });
+    if (!r.ok) throw new Error('Erreur suppression');
+  }
+
+  function fsParseDoc(doc) {
+    const fields = doc.fields || {};
+    const result = {};
+    for (const [k, v] of Object.entries(fields)) {
+      if (v.stringValue !== undefined) result[k] = v.stringValue;
+      else if (v.booleanValue !== undefined) result[k] = v.booleanValue;
+      else if (v.arrayValue !== undefined) result[k] = (v.arrayValue.values || []).map(i => i.stringValue || '');
+      else if (v.timestampValue !== undefined) result[k] = v.timestampValue;
+    }
+    return result;
+  }
+
+  function fsEncodeFields(obj) {
+    const fields = {};
+    for (const [k, v] of Object.entries(obj)) {
+      if (typeof v === 'string') fields[k] = { stringValue: v };
+      else if (typeof v === 'boolean') fields[k] = { booleanValue: v };
+      else if (Array.isArray(v)) fields[k] = { arrayValue: { values: v.map(i => ({ stringValue: String(i) })) } };
+    }
+    return fields;
+  }
 
   const ADMIN_PASSWORD = "samuel04";
   let selectedFiles = [];
   let generatedLink = '';
-  let currentEditToken = null;
-  let editAddFiles = [];
 
   // ── LOGIN ──
   window.adminLogin = function() {
@@ -288,7 +345,7 @@
         photoUrls.push(url);
         progressFill.style.width = Math.round(((i+1)/selectedFiles.length)*100) + '%';
       }
-      await setDoc(doc(db, 'clients', token), { nom, session, photos: photoUrls, actif: true, createdAt: new Date().toISOString() });
+      await fsSet('clients', token, { nom, session, photos: photoUrls, actif: true, createdAt: new Date().toISOString() });
       msg.className = 'msg success'; msg.textContent = 'Client créé !';
       const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
       generatedLink = `${baseUrl}index.html?token=${token}`;
@@ -318,10 +375,8 @@
     const list = document.getElementById('clientsList');
     list.innerHTML = '<p class="empty-list">Chargement…</p>';
     try {
-      const snap = await getDocs(collection(db, 'clients'));
-      if (snap.empty) { list.innerHTML = '<p class="empty-list">Aucun client</p>'; return; }
-      const clients = [];
-      snap.forEach(d => clients.push({ id: d.id, ...d.data() }));
+      const clients = await fsList('clients');
+      if (clients.length === 0) { list.innerHTML = '<p class="empty-list">Aucun client</p>'; return; }
       clients.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
       list.innerHTML = '';
       clients.forEach(c => renderClientRow(c, list));
@@ -375,7 +430,7 @@
         <button class="btn-zip" id="zip-btn-${c.id}" onclick="downloadZip('${c.id}')">⬇ Télécharger toutes les photos (ZIP)</button>
         <div class="edit-photos-grid" id="photos-grid-${c.id}">
           ${(c.photos||[]).map((url,i) => `
-            <div class="edit-photo-wrap" id="photo-wrap-${c.id}-${i}" draggable="true" data-index="${i}" data-token="${c.id}">
+            <div class="edit-photo-wrap" id="photo-wrap-${c.id}-${i}" draggable="true" data-index="${i}" data-token="${c.id}" data-url="${url}">
               <img class="edit-photo-img" src="${url.replace('/upload/','/upload/w_140,c_fill/')}">
               <button class="edit-photo-del" onclick="removePhoto('${c.id}', ${i})">✕</button>
               <a class="edit-photo-dl" href="${url}" download target="_blank" title="Télécharger">⬇</a>
@@ -401,55 +456,34 @@
     initDragDrop(c.id, c.photos||[]);
   }
 
-  // ── DRAG & DROP REORDER ──
-  let dragSrc = null;
-  let dragToken = null;
-  let photoOrderMap = {}; // token -> [urls]
+  // ── DRAG & DROP REORDER (SortableJS) ──
+  let photoOrderMap = {};
+  let sortableInstances = {};
 
-  function initDragDrop(token, photos) {
+  async function loadSortable() {
+    if (window.Sortable) return;
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  async function initDragDrop(token, photos) {
     photoOrderMap[token] = [...photos];
     const grid = document.getElementById(`photos-grid-${token}`);
     if (!grid) return;
-    const items = grid.querySelectorAll('.edit-photo-wrap');
-    items.forEach(item => {
-      item.addEventListener('dragstart', e => {
-        dragSrc = item;
-        dragToken = token;
-        setTimeout(() => item.classList.add('dragging'), 0);
-        e.dataTransfer.effectAllowed = 'move';
-      });
-      item.addEventListener('dragend', () => {
-        item.classList.remove('dragging');
-        grid.querySelectorAll('.edit-photo-wrap').forEach(i => i.classList.remove('drag-over-item'));
-      });
-      item.addEventListener('dragover', e => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        if (item !== dragSrc) {
-          grid.querySelectorAll('.edit-photo-wrap').forEach(i => i.classList.remove('drag-over-item'));
-          item.classList.add('drag-over-item');
-        }
-      });
-      item.addEventListener('drop', e => {
-        e.preventDefault();
-        if (dragSrc && item !== dragSrc && dragToken === token) {
-          // Réordonner dans le DOM
-          const allItems = [...grid.querySelectorAll('.edit-photo-wrap')];
-          const srcIdx = allItems.indexOf(dragSrc);
-          const tgtIdx = allItems.indexOf(item);
-          if (srcIdx < tgtIdx) grid.insertBefore(dragSrc, item.nextSibling);
-          else grid.insertBefore(dragSrc, item);
-          item.classList.remove('drag-over-item');
-          // Mettre à jour l'ordre en mémoire
-          const newOrder = [...grid.querySelectorAll('.edit-photo-wrap')].map(el => {
-            const idx = parseInt(el.dataset.index);
-            return photoOrderMap[token][idx];
-          });
-          photoOrderMap[token] = newOrder;
-          // Montrer le bouton sauvegarder
-          document.getElementById(`save-order-${token}`).style.display = 'block';
-        }
-      });
+    await loadSortable();
+    if (sortableInstances[token]) sortableInstances[token].destroy();
+    sortableInstances[token] = new window.Sortable(grid, {
+      animation: 150,
+      ghostClass: 'drag-over-item',
+      onEnd: () => {
+        const newOrder = [...grid.querySelectorAll('.edit-photo-wrap')].map(el => el.dataset.url);
+        photoOrderMap[token] = newOrder;
+        document.getElementById(`save-order-${token}`).style.display = 'block';
+      }
     });
   }
 
@@ -458,7 +492,7 @@
     const btn = document.getElementById(`save-order-${token}`);
     msg.className = 'msg info'; msg.textContent = 'Enregistrement de l\'ordre…';
     try {
-      await updateDoc(doc(db, 'clients', token), { photos: photoOrderMap[token] });
+      await fsUpdate('clients', token, { photos: photoOrderMap[token] });
       msg.className = 'msg success'; msg.textContent = 'Ordre enregistré !';
       btn.style.display = 'none';
       setTimeout(() => { msg.textContent = ''; }, 2000);
@@ -471,10 +505,9 @@
     btn.disabled = true;
     btn.textContent = '⏳ Préparation du ZIP…';
     try {
-      const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const snap = await getDoc(doc(db, 'clients', token));
-      const photos = snap.data().photos || [];
-      const nom = (snap.data().nom || 'client').replace(/\s+/g, '_');
+      const data = await fsGet('clients', token);
+      const photos = data.photos || [];
+      const nom = (data.nom || 'client').replace(/\s+/g, '_');
 
       // Charger JSZip depuis CDN
       if (!window.JSZip) {
@@ -526,7 +559,7 @@
     const msg = document.getElementById(`msg-info-${token}`);
     msg.className='msg info'; msg.textContent='Enregistrement…';
     try {
-      await updateDoc(doc(db, 'clients', token), { nom, session });
+      await fsUpdate('clients', token, { nom, session });
       msg.className='msg success'; msg.textContent='Infos mises à jour !';
       // Mettre à jour l'affichage
       document.querySelector(`#row-${token} .client-nom`).textContent = nom;
@@ -539,10 +572,10 @@
     const msg = document.getElementById(`msg-photos-${token}`);
     msg.className='msg info'; msg.textContent='Suppression…';
     try {
-      const snap = await (await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js")).getDoc(doc(db, 'clients', token));
-      const photos = [...(snap.data().photos||[])];
+      const data = await fsGet('clients', token);
+      const photos = [...(data.photos||[])];
       photos.splice(index, 1);
-      await updateDoc(doc(db, 'clients', token), { photos });
+      await fsUpdate('clients', token, { photos });
       // Recharger la ligne
       msg.className='msg success'; msg.textContent='Photo supprimée.';
       setTimeout(() => loadClients(), 800);
@@ -574,9 +607,8 @@
     progressBar.style.display = 'block';
     msg.className='msg info'; msg.textContent='Upload en cours…';
     try {
-      const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const snap = await getDoc(doc(db, 'clients', token));
-      const existing = [...(snap.data().photos||[])];
+      const data = await fsGet('clients', token);
+      const existing = [...(data.photos||[])];
       const newUrls = [];
       for (let i = 0; i < files.length; i++) {
         msg.textContent = `Upload ${i+1}/${files.length}…`;
@@ -585,7 +617,7 @@
         progressFill.style.width = Math.round(((i+1)/files.length)*100) + '%';
       }
       const allPhotos = [...existing, ...newUrls];
-      await updateDoc(doc(db, 'clients', token), { photos: allPhotos });
+      await fsUpdate('clients', token, { photos: allPhotos });
       msg.className='msg success'; msg.textContent=`${newUrls.length} photo(s) ajoutée(s) !`;
       addFilesMap[token] = [];
       setTimeout(() => loadClients(), 800);
@@ -594,7 +626,7 @@
 
   // ── TOGGLE ACTIF ──
   window.toggleClient = async function(token, currentlyActive) {
-    await updateDoc(doc(db, 'clients', token), { actif: !currentlyActive });
+    await fsUpdate('clients', token, { actif: !currentlyActive });
     loadClients();
   };
 
@@ -607,7 +639,7 @@
   };
   window.deleteClient = async function(token) {
     try {
-      await deleteDoc(doc(db, 'clients', token));
+      await fsDelete('clients', token);
       loadClients();
     } catch(e) { alert('Erreur : ' + e.message); }
   };
