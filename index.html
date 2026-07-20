@@ -231,16 +231,30 @@
     return result;
   }
 
+  // Helpers cookies
+  function setCookie(name, value, days) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+    document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/;SameSite=Lax`;
+  }
+  function getCookie(name) {
+    const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return v ? v.pop() : null;
+  }
+  function deleteCookie(name) {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/`;
+  }
+
   // Si token dans l'URL → aller directement à la galerie
   const urlParams = new URLSearchParams(window.location.search);
   const urlToken = urlParams.get('token');
   if (urlToken) {
-    localStorage.setItem('albumToken', urlToken.trim().toUpperCase());
+    setCookie('albumToken', urlToken.trim().toUpperCase(), 365);
     window.location.href = 'gallery.html';
   }
 
   // Si token déjà mémorisé → vérifier qu'il est valide puis rediriger
-  const savedToken = localStorage.getItem('albumToken');
+  const savedToken = getCookie('albumToken');
   if (savedToken) {
     fetch(`https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/clients/${savedToken}?key=${firebaseConfig.apiKey}`)
       .then(r => r.json())
@@ -248,10 +262,10 @@
         if (doc.fields && doc.fields.actif?.booleanValue !== false) {
           window.location.href = 'gallery.html';
         } else {
-          localStorage.removeItem('albumToken');
+          deleteCookie('albumToken');
         }
       })
-      .catch(() => localStorage.removeItem('albumToken'));
+      .catch(() => {});
   }
 
   window.accessGallery = async function() {
