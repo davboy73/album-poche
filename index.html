@@ -231,6 +231,12 @@
     return result;
   }
 
+  // Si token déjà mémorisé → redirection directe
+  const savedToken = localStorage.getItem('albumToken');
+  if (savedToken) {
+    window.location.href = 'gallery.html';
+  }
+
   // Vérification token depuis URL
   const urlParams = new URLSearchParams(window.location.search);
   const urlToken = urlParams.get('token');
@@ -280,7 +286,7 @@
       }
 
       sessionStorage.setItem('albumToken', raw);
-      sessionStorage.setItem('albumClient', JSON.stringify(data));
+      localStorage.setItem('albumToken', raw);
       window.location.href = 'gallery.html';
 
     } catch (e) {
