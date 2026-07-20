@@ -666,38 +666,45 @@
   window.sendEmail = function(token, nom) {
     const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
     const lien = `${baseUrl}index.html?token=${token}`;
-    const sujet = encodeURIComponent(`Vos photos sont disponibles — David Boyer Photographe`);
+    const sujet = encodeURIComponent(`Votre Album de Poche est prêt — David Boyer Photographe`);
     const corps = encodeURIComponent(
 `Bonjour ${nom},
 
-Vos photos sont prêtes ! Vous pouvez les consulter en cliquant sur le lien ci-dessous :
+Votre Album de Poche est prêt !
+
+Retrouvez vos photos en cliquant sur le lien ci-dessous :
 
 ${lien}
 
-Ce lien vous est personnel et vous permet d'accéder à votre galerie privée.
+Ce lien vous est personnel. Il vous donne accès à votre galerie privée, accessible uniquement par vous.
 
----
-💡 ASTUCE — Installez votre galerie sur votre téléphone :
 
-Sur iPhone / iPad :
-1. Ouvrez le lien ci-dessus dans Safari
-2. Appuyez sur le bouton Partager (carré avec une flèche ↑)
-3. Choisissez "Sur l'écran d'accueil"
-4. Appuyez sur "Ajouter"
-→ Votre galerie apparaît comme une application sur votre écran d'accueil !
+════════════════════════════
+💡 INSTALLER VOTRE GALERIE SUR VOTRE TÉLÉPHONE
+════════════════════════════
 
-Sur Android :
-1. Ouvrez le lien ci-dessus dans Chrome
-2. Appuyez sur les 3 points en haut à droite
-3. Choisissez "Ajouter à l'écran d'accueil"
-4. Appuyez sur "Ajouter"
-→ Votre galerie apparaît comme une application sur votre écran d'accueil !
----
+Sur iPhone / iPad (Safari) :
+  1. Ouvrez le lien ci-dessus dans Safari
+  2. Appuyez sur le bouton Partager ↑
+  3. Choisissez "Sur l'écran d'accueil"
+  4. Appuyez sur "Ajouter"
 
-À bientôt,
-David Boyer Photographe
-contact@david-boyer-photographe.com
-www.david-boyer-photographe.fr`
+Sur Android (Chrome) :
+  1. Ouvrez le lien ci-dessus dans Chrome
+  2. Appuyez sur les ⋮ en haut à droite
+  3. Choisissez "Ajouter à l'écran d'accueil"
+  4. Appuyez sur "Ajouter"
+
+Votre galerie s'ouvrira alors comme une vraie application !
+════════════════════════════
+
+
+À très bientôt,
+
+David Boyer
+Photographe
+✉ contact@david-boyer-photographe.com
+🌐 www.david-boyer-photographe.fr`
     );
     window.location.href = `mailto:?subject=${sujet}&body=${corps}`;
   };
