@@ -253,11 +253,6 @@
       })
       .catch(() => localStorage.removeItem('albumToken'));
   }
-  const urlToken = urlParams.get('token');
-  if (urlToken) {
-    document.getElementById('tokenInput').value = urlToken;
-    setTimeout(() => accessGallery(), 300);
-  }
 
   window.accessGallery = async function() {
     const btn = document.getElementById('accessBtn');
