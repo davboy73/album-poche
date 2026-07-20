@@ -231,10 +231,20 @@
     return result;
   }
 
-  // Si token déjà mémorisé → redirection directe
+  // Si token déjà mémorisé → vérifier qu'il est valide puis rediriger
   const savedToken = localStorage.getItem('albumToken');
-  if (savedToken) {
-    window.location.href = 'gallery.html';
+  if (savedToken && !window.location.search.includes('token=')) {
+    // Vérifier que le token est toujours valide
+    fetch(`https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/clients/${savedToken}?key=${firebaseConfig.apiKey}`)
+      .then(r => r.json())
+      .then(doc => {
+        if (doc.fields && doc.fields.actif?.booleanValue !== false) {
+          window.location.href = 'gallery.html';
+        } else {
+          localStorage.removeItem('albumToken');
+        }
+      })
+      .catch(() => localStorage.removeItem('albumToken'));
   }
 
   // Vérification token depuis URL
