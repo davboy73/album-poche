@@ -231,10 +231,17 @@
     return result;
   }
 
+  // Si token dans l'URL → aller directement à la galerie
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlToken = urlParams.get('token');
+  if (urlToken) {
+    localStorage.setItem('albumToken', urlToken.trim().toUpperCase());
+    window.location.href = 'gallery.html';
+  }
+
   // Si token déjà mémorisé → vérifier qu'il est valide puis rediriger
   const savedToken = localStorage.getItem('albumToken');
-  if (savedToken && !window.location.search.includes('token=')) {
-    // Vérifier que le token est toujours valide
+  if (savedToken) {
     fetch(`https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/clients/${savedToken}?key=${firebaseConfig.apiKey}`)
       .then(r => r.json())
       .then(doc => {
@@ -246,9 +253,6 @@
       })
       .catch(() => localStorage.removeItem('albumToken'));
   }
-
-  // Vérification token depuis URL
-  const urlParams = new URLSearchParams(window.location.search);
   const urlToken = urlParams.get('token');
   if (urlToken) {
     document.getElementById('tokenInput').value = urlToken;
