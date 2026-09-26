@@ -1,0 +1,10 @@
+[[redirects]]
+  from = "/g/:token"
+  to = "/.netlify/functions/client/:token"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
