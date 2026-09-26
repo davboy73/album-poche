@@ -356,8 +356,8 @@
       if (expiry) clientData.expiry = expiry;
       await fsSet('clients', token, clientData);
       msg.className = 'msg success'; msg.textContent = 'Client créé !';
-      const baseUrl = 'https://david-boyer-photographe.netlify.app/g/';
-      generatedLink = `${baseUrl}${token}`;
+      const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
+      generatedLink = `${baseUrl}index.html?token=${token}`;
       document.getElementById('linkCode').textContent = generatedLink;
       document.getElementById('tokenDisplay').textContent = token;
       document.getElementById('linkResult').style.display = 'block';
@@ -664,7 +664,8 @@
   };
 
   window.sendEmail = function(token, nom) {
-    const lien = `https://david-boyer-photographe.netlify.app/g/${token}`;
+    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
+    const lien = `${baseUrl}index.html?token=${token}`;
     const sujet = encodeURIComponent(`Votre Album de Poche est prêt — David Boyer Photographe`);
     const corps = encodeURIComponent(
 `Bonjour ${nom},
@@ -707,7 +708,8 @@ Sur Android (Chrome) :
 
   // ── COPIER LIEN ──
   window.copyClientLink = function(token) {
-    const link = `https://david-boyer-photographe.netlify.app/g/${token}`;
+    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
+    const link = `${baseUrl}index.html?token=${token}`;
     navigator.clipboard.writeText(link).then(() => alert('Lien copié !'));
   };
 
