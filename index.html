@@ -251,6 +251,21 @@
   if (urlToken) {
     setCookie('albumToken', urlToken.trim().toUpperCase(), 365);
     window.location.href = 'gallery.html';
+  } else {
+    // Pas de token → afficher message d'aide
+    document.getElementById('loginCard').innerHTML = `
+      <div style="text-align:center;padding:1rem 0;">
+        <p style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-style:italic;color:var(--cream);margin-bottom:1.25rem;">
+          Pour accéder à votre galerie,<br>utilisez le lien reçu par email.
+        </p>
+        <p style="font-size:0.65rem;color:var(--text-muted);letter-spacing:0.1em;line-height:1.8;">
+          Ce lien vous a été envoyé personnellement<br>
+          par David Boyer Photographe.<br><br>
+          Si vous ne le trouvez pas, vérifiez<br>
+          vos courriers indésirables.
+        </p>
+      </div>
+    `;
   }
 
   // Si token déjà mémorisé → vérifier qu'il est valide puis rediriger
