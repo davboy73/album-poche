@@ -356,8 +356,8 @@
       if (expiry) clientData.expiry = expiry;
       await fsSet('clients', token, clientData);
       msg.className = 'msg success'; msg.textContent = 'Client créé !';
-      const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
-      generatedLink = `${baseUrl}index.html?token=${token}`;
+      const baseUrl = 'https://splendid-bavarois-fc918b.netlify.app/g/';
+      generatedLink = `${baseUrl}${token}`;
       document.getElementById('linkCode').textContent = generatedLink;
       document.getElementById('tokenDisplay').textContent = token;
       document.getElementById('linkResult').style.display = 'block';
@@ -664,8 +664,7 @@
   };
 
   window.sendEmail = function(token, nom) {
-    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
-    const lien = `${baseUrl}index.html?token=${token}`;
+    const lien = `https://splendid-bavarois-fc918b.netlify.app/g/${token}`;
     const sujet = encodeURIComponent(`Votre Album de Poche est prêt — David Boyer Photographe`);
     const corps = encodeURIComponent(
 `Bonjour ${nom},
@@ -683,36 +682,32 @@ Ce lien vous est personnel. Il vous donne accès à votre galerie privée, acces
 💡 INSTALLER VOTRE GALERIE SUR VOTRE TÉLÉPHONE
 ════════════════════════════
 
+⚠️ Important : installez l'application DEPUIS CE LIEN,
+sans fermer la page après avoir consulté vos photos.
+
 Sur iPhone / iPad (Safari) :
   1. Ouvrez le lien ci-dessus dans Safari
-  2. Appuyez sur le bouton Partager ↑
-  3. Choisissez "Sur l'écran d'accueil"
-  4. Appuyez sur "Ajouter"
+  2. Consultez vos photos
+  3. Appuyez sur le bouton Partager ↑ (en bas de l'écran)
+  4. Choisissez "Sur l'écran d'accueil"
+  5. Appuyez sur "Ajouter"
+  → Votre galerie s'ouvre directement à chaque fois !
 
 Sur Android (Chrome) :
   1. Ouvrez le lien ci-dessus dans Chrome
-  2. Appuyez sur les ⋮ en haut à droite
-  3. Choisissez "Ajouter à l'écran d'accueil"
-  4. Appuyez sur "Ajouter"
-
-Votre galerie s'ouvrira alors comme une vraie application !
-════════════════════════════
-
-
-À très bientôt,
-
-David Boyer
-Photographe
-✉ contact@david-boyer-photographe.com
-🌐 www.david-boyer-photographe.fr`
+  2. Consultez vos photos
+  3. Appuyez sur les ⋮ en haut à droite
+  4. Choisissez "Ajouter à l'écran d'accueil"
+  5. Appuyez sur "Ajouter"
+  → Votre galerie s'ouvre directement à chaque fois !
+════════════════════════════`
     );
     window.location.href = `mailto:?subject=${sujet}&body=${corps}`;
   };
 
   // ── COPIER LIEN ──
   window.copyClientLink = function(token) {
-    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
-    const link = `${baseUrl}index.html?token=${token}`;
+    const link = `https://splendid-bavarois-fc918b.netlify.app/g/${token}`;
     navigator.clipboard.writeText(link).then(() => alert('Lien copié !'));
   };
 
