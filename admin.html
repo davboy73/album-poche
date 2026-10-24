@@ -191,7 +191,6 @@
 <script>
   // ── LIENS CLIENTS & FOTOSTUDIO ──
   const CLIENT_LINK_BASE = 'https://david-boyer-photographe.netlify.app/g/';
-  const FOTOSTUDIO_URL   = 'https://www.fotostudio.io/app/events';
   const clientLink = token => CLIENT_LINK_BASE + token;
   // ── FIRESTORE REST API (compatible Safari) ──
   const PROJECT_ID = firebaseConfig.projectId;
@@ -415,7 +414,7 @@
       <div class="client-actions">
         <button class="btn-ghost" onclick="toggleEdit('${c.id}')">✏️ Modifier</button>
         <button class="btn-ghost" onclick="copyClientLink('${c.id}')">🔗 Lien</button>
-        <button class="btn-ghost" onclick="sendViaFotostudio('${c.id}')">✉️ Fotostudio</button>
+        <button class="btn-ghost" onclick="sendViaFotostudio('${c.id}', this)">✉️ Fotostudio</button>
         <button class="btn-warning" onclick="toggleClient('${c.id}', ${c.actif!==false})">${c.actif!==false?'Désactiver':'Réactiver'}</button>
         <button class="btn-danger" onclick="askDelete('${c.id}')">🗑 Supprimer</button>
       </div>
@@ -667,16 +666,21 @@
   };
 
   // ── ENVOI VIA FOTOSTUDIO ──
-  // Copie le lien magique puis ouvre Fotostudio : sur la fiche du client,
-  // « Envoyer un email » → modèle « Album Poche – Vos photos sont prêtes »
+  // Copie le lien magique. Ensuite, dans l'onglet Fotostudio (épinglé) :
+  // fiche du client → « Envoyer un email » → modèle « Album Poche – Vos photos sont prêtes »
   // → coller le lien à la place de [COLLER LE LIEN ICI].
-  window.sendViaFotostudio = function(token) {
+  // (Fotostudio refuse la session quand on l'ouvre depuis un autre site : on n'ouvre donc pas d'onglet.)
+  window.sendViaFotostudio = function(token, btn) {
     const lien = clientLink(token);
-    // On copie d'abord (pendant le clic), puis on ouvre Fotostudio
-    navigator.clipboard.writeText(lien).catch(() => {
+    navigator.clipboard.writeText(lien).then(() => {
+      if (!btn) return;
+      const label = btn.textContent;
+      btn.textContent = '✓ Lien copié';
+      btn.disabled = true;
+      setTimeout(() => { btn.textContent = label; btn.disabled = false; }, 2000);
+    }).catch(() => {
       prompt('Copie ce lien puis colle-le dans l\'email Fotostudio :', lien);
     });
-    window.open(FOTOSTUDIO_URL, '_blank');
   };
 
   // ── COPIER LIEN ──
