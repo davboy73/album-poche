@@ -75,7 +75,7 @@
     .badge-actif { font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 2px; }
     .badge-actif.on { color: var(--success); border: 1px solid rgba(110,201,169,0.3); }
     .badge-actif.off { color: var(--danger); border: 1px solid rgba(224,112,112,0.3); }
-    .client-actions { display: flex; gap: 0.4rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(201,169,110,0.08); }
+    .client-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(201,169,110,0.08); }
     .empty-list { text-align: center; padding: 2.5rem; color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.12em; }
 
     /* Edit panel */
@@ -192,6 +192,7 @@
   // ── LIENS CLIENTS & FOTOSTUDIO ──
   const CLIENT_LINK_BASE = 'https://david-boyer-photographe.netlify.app/g/';
   const clientLink = token => CLIENT_LINK_BASE + token;
+  const clientNames = {};
   // ── FIRESTORE REST API (compatible Safari) ──
   const PROJECT_ID = firebaseConfig.projectId;
   const API_KEY = firebaseConfig.apiKey;
@@ -395,6 +396,7 @@
   };
 
   function renderClientRow(c, container) {
+    clientNames[c.id] = c.nom || '';
     const row = document.createElement('div');
     row.className = 'client-row' + (c.actif === false ? ' inactive' : '');
     row.id = `row-${c.id}`;
@@ -415,6 +417,8 @@
         <button class="btn-ghost" onclick="toggleEdit('${c.id}')">✏️ Modifier</button>
         <button class="btn-ghost" onclick="copyClientLink('${c.id}')">🔗 Lien</button>
         <button class="btn-ghost" onclick="sendViaFotostudio('${c.id}', this)">✉️ Fotostudio</button>
+        <button class="btn-ghost" onclick="sendWhatsApp('${c.id}')">💬 WhatsApp</button>
+        <button class="btn-ghost" onclick="sendSMS('${c.id}')">📱 SMS</button>
         <button class="btn-warning" onclick="toggleClient('${c.id}', ${c.actif!==false})">${c.actif!==false?'Désactiver':'Réactiver'}</button>
         <button class="btn-danger" onclick="askDelete('${c.id}')">🗑 Supprimer</button>
       </div>
@@ -681,6 +685,23 @@
     }).catch(() => {
       prompt('Copie ce lien puis colle-le dans l\'email Fotostudio :', lien);
     });
+  };
+
+  // ── ENVOI WHATSAPP / SMS ──
+  // Message pré-rempli avec le lien ; on choisit le destinataire dans l'appli.
+  function shortMessage(token) {
+    const nom = (clientNames[token] || '').trim();
+    return `Bonjour${nom ? ' ' + nom : ''}, votre Album de Poche est prêt ! `
+      + `Retrouvez vos photos ici : ${clientLink(token)}\n`
+      + `Astuce : ajoutez la page à votre écran d'accueil pour la retrouver comme une appli 📱\n`
+      + `David Boyer Photographe`;
+  }
+  window.sendWhatsApp = function(token) {
+    window.open('https://wa.me/?text=' + encodeURIComponent(shortMessage(token)), '_blank');
+  };
+  window.sendSMS = function(token) {
+    const apple = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+    window.location.href = 'sms:' + (apple ? '&' : '?') + 'body=' + encodeURIComponent(shortMessage(token));
   };
 
   // ── COPIER LIEN ──
