@@ -31,10 +31,11 @@
     .gallery-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; font-style: italic; color: var(--cream); }
     .gallery-subtitle { font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.5rem; }
     .divider { width: 30px; height: 1px; background: var(--gold); margin: 1.5rem auto; opacity: 0.4; }
-    .grid { columns: 3; column-gap: 4px; padding: 0 2rem 3rem; max-width: 1200px; margin: 0 auto; }
-    @media (max-width: 900px) { .grid { columns: 2; } }
-    @media (max-width: 500px) { .grid { columns: 1; padding: 0 0.5rem 2rem; } }
-    .grid-item { position: relative; break-inside: avoid; margin-bottom: 4px; cursor: pointer; background: #000; overflow: hidden; }
+    .grid { display: flex; align-items: flex-start; gap: 4px; padding: 0 2rem 3rem; max-width: 1200px; margin: 0 auto; }
+    @media (max-width: 500px) { .grid { padding: 0 0.5rem 2rem; } }
+    .grid-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .grid .state-center, .grid > .skeleton { flex: 1; }
+    .grid-item { position: relative; cursor: pointer; background: #000; overflow: hidden; }
     .grid-item img { width: 100%; height: auto; display: block; transition: transform 0.4s ease, opacity 0.3s; pointer-events: none; opacity: 0.92; }
     .grid-item:hover img { transform: scale(1.02); opacity: 1; }
     .grid-item-overlay { position: absolute; inset: 0; background: rgba(14,27,42,0); transition: background 0.3s; }
@@ -115,7 +116,8 @@
     return v ? v.pop() : null;
   }
 
-  const token = sessionStorage.getItem('albumToken') || getCookie('albumToken');
+  let lsToken = null; try { lsToken = localStorage.getItem('albumToken'); } catch(e) {}
+  const token = sessionStorage.getItem('albumToken') || getCookie('albumToken') || lsToken;
   if (!token) { window.location.href = 'index.html'; }
 
   document.addEventListener('contextmenu', e => e.preventDefault());
@@ -135,6 +137,10 @@
     try {
       const data = await fsGet('clients', token);
 
+      // Accès désactivé ou expiré (date d'expiration = fin de journée incluse)
+      const expired = data.expiry && new Date(data.expiry + 'T23:59:59') < new Date();
+      if (data.actif === false || expired) { showUnavailable(); return; }
+
       document.getElementById('clientName').textContent = data.nom || '—';
       document.getElementById('sessionLabel').textContent = data.session || '';
       const photoUrls = data.photos || [];
@@ -148,19 +154,79 @@
 
       photos = photoUrls;
 
-      photoUrls.forEach((url, i) => {
+      // Maçonnerie lue ligne par ligne : chaque photo, dans l'ordre,
+      // va dans la colonne la moins haute (sans recadrage).
+      gridItems = photoUrls.map((url, i) => {
         const thumbUrl = url.replace('/upload/', '/upload/w_600,q_auto,f_auto/');
         const item = document.createElement('div');
         item.className = 'grid-item';
-        item.innerHTML = `<img src="${thumbUrl}" alt="Photo ${i+1}" loading="lazy"><div class="grid-item-overlay"></div>`;
+        const img = new Image();
+        img.alt = `Photo ${i+1}`;
+        const entry = { el: item, ratio: 0 };
+        entry.ready = new Promise(res => {
+          img.onload = () => { entry.ratio = img.naturalHeight / img.naturalWidth; res(); };
+          img.onerror = () => { entry.ratio = 1; res(); };
+        });
+        img.src = thumbUrl;
+        item.appendChild(img);
+        item.insertAdjacentHTML('beforeend', '<div class="grid-item-overlay"></div>');
         item.addEventListener('click', () => openLightbox(i));
-        grid.appendChild(item);
+        return entry;
       });
+      layoutGrid();
 
     } catch(e) {
       console.error(e);
+      if (e.message === 'Document introuvable') { showUnavailable(); return; }
       grid.innerHTML = `<div class="state-center"><p class="state-text">Erreur de chargement — réessayez</p></div>`;
     }
+  }
+
+  let gridItems = [];
+  let layoutRun = 0;
+  const colCount = () => window.innerWidth <= 500 ? 1 : window.innerWidth <= 900 ? 2 : 3;
+
+  async function layoutGrid() {
+    const run = ++layoutRun;
+    const grid = document.getElementById('grid');
+    const n = colCount();
+    grid.dataset.cols = n;
+    grid.innerHTML = '';
+    const cols = [], heights = [];
+    for (let c = 0; c < n; c++) {
+      const col = document.createElement('div'); col.className = 'grid-col';
+      grid.appendChild(col); cols.push(col); heights.push(0);
+    }
+    for (const entry of gridItems) {
+      await entry.ready;                 // on respecte l'ordre : on attend la photo précédente
+      if (run !== layoutRun) return;     // une nouvelle mise en page a démarré
+      let k = 0;
+      for (let c = 1; c < n; c++) if (heights[c] < heights[k] - 0.01) k = c;
+      cols[k].appendChild(entry.el);
+      heights[k] += entry.ratio + 0.02;
+    }
+  }
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const grid = document.getElementById('grid');
+      if (gridItems.length && String(colCount()) !== grid.dataset.cols) layoutGrid();
+    }, 150);
+  });
+
+  function showUnavailable() {
+    gridItems = []; layoutRun++;
+    document.getElementById('grid').innerHTML = `
+      <div class="state-center">
+        <p class="state-text">Cet accès n'est plus disponible.</p>
+        <p class="state-text" style="margin-top:0.8rem;font-size:0.85em;opacity:0.75;">
+          Pour retrouver vos photos, contactez David Boyer Photographe :<br>
+          <a href="mailto:contact@david-boyer-photographe.com" style="color:#c9a96e;">contact@david-boyer-photographe.com</a>
+        </p>
+      </div>`;
+    const c = document.getElementById('clientCount'); if (c) c.textContent = '';
   }
 
   function openLightbox(i) {

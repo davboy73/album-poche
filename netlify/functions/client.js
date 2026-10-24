@@ -25,6 +25,7 @@ exports.handler = async (event) => {
       document.cookie = name + '=' + value + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
     }
     setCookie('albumToken', TOKEN, 365);
+    try { localStorage.setItem('albumToken', TOKEN); } catch(e) {}
     window.location.href = '/gallery.html';
   </script>
 </head>

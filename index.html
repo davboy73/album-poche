@@ -249,7 +249,9 @@
   const urlParams = new URLSearchParams(window.location.search);
   const urlToken = urlParams.get('token');
   if (urlToken) {
-    setCookie('albumToken', urlToken.trim().toUpperCase(), 365);
+    const t = urlToken.trim().toUpperCase();
+    setCookie('albumToken', t, 365);
+    try { localStorage.setItem('albumToken', t); } catch(e) {}
     window.location.href = 'gallery.html';
   } else {
     // Pas de token → afficher message d'aide
@@ -268,19 +270,14 @@
     `;
   }
 
-  // Si token déjà mémorisé → vérifier qu'il est valide puis rediriger
-  const savedToken = getCookie('albumToken');
-  if (savedToken) {
-    fetch(`https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/clients/${savedToken}?key=${firebaseConfig.apiKey}`)
-      .then(r => r.json())
-      .then(doc => {
-        if (doc.fields && doc.fields.actif?.booleanValue !== false) {
-          window.location.href = 'gallery.html';
-        } else {
-          deleteCookie('albumToken');
-        }
-      })
-      .catch(() => {});
+  // Si un accès est déjà mémorisé → aller directement à la galerie.
+  // On ne l'efface JAMAIS ici : si l'accès est désactivé ou expiré, c'est la galerie
+  // qui affiche « plus disponible », et une réactivation rend l'accès sans réinstaller la tuile.
+  let savedToken = getCookie('albumToken');
+  try { savedToken = savedToken || localStorage.getItem('albumToken'); } catch(e) {}
+  if (!urlToken && savedToken) {
+    setCookie('albumToken', savedToken, 365);
+    window.location.replace('gallery.html');
   }
 
   window.accessGallery = async function() {
@@ -316,7 +313,7 @@
       }
 
       // Vérifier date d'expiration
-      if (data.expiry && new Date(data.expiry) < new Date()) {
+      if (data.expiry && new Date(data.expiry + 'T23:59:59') < new Date()) {
         msg.className = 'message error';
         msg.textContent = 'Votre accès a expiré. Contactez le photographe.';
         btn.disabled = false;
@@ -325,6 +322,7 @@
 
       sessionStorage.setItem('albumToken', raw);
       localStorage.setItem('albumToken', raw);
+      setCookie('albumToken', raw, 365);
       window.location.href = 'gallery.html';
 
     } catch (e) {

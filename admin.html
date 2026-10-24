@@ -289,9 +289,12 @@
   };
   document.getElementById('adminPwd').addEventListener('keydown', e => { if(e.key==='Enter') window.adminLogin(); });
 
+  // Tri « naturel » par nom de fichier : IMG_2 avant IMG_10
+  const byFileName = (a, b) => a.name.localeCompare(b.name, 'fr', { numeric: true, sensitivity: 'base' });
+
   // ── FICHIERS NOUVEAU CLIENT ──
   window.previewFiles = function(files) {
-    selectedFiles = Array.from(files).slice(0, 50);
+    selectedFiles = Array.from(files).sort(byFileName).slice(0, 50);
     renderNewPreview();
   };
 
@@ -630,7 +633,7 @@
   let addFilesMap = {};
 
   window.previewAddFiles = function(token, files) {
-    addFilesMap[token] = Array.from(files);
+    addFilesMap[token] = Array.from(files).sort(byFileName);
     const preview = document.getElementById(`add-preview-${token}`);
     preview.innerHTML = '';
     addFilesMap[token].forEach(f => {
