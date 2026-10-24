@@ -692,8 +692,10 @@
   function shortMessage(token) {
     const nom = (clientNames[token] || '').trim();
     return `Bonjour${nom ? ' ' + nom : ''}, votre Album de Poche est prêt ! `
-      + `Retrouvez vos photos ici : ${clientLink(token)}\n`
-      + `Astuce : ajoutez la page à votre écran d'accueil pour la retrouver comme une appli 📱\n`
+      + `Retrouvez vos photos ici : ${clientLink(token)}\n\n`
+      + `📱 Pour garder votre galerie comme une appli, ouvrez le lien puis :\n`
+      + `• iPhone (Safari) : bouton Partager ↑ › « Sur l'écran d'accueil »\n`
+      + `• Android (Chrome) : menu ⋮ › « Ajouter à l'écran d'accueil »\n\n`
       + `David Boyer Photographe`;
   }
   window.sendWhatsApp = function(token) {
