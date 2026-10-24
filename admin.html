@@ -189,6 +189,10 @@
 
 <script src="firebase-config.js"></script>
 <script>
+  // ── LIENS CLIENTS & FOTOSTUDIO ──
+  const CLIENT_LINK_BASE = 'https://david-boyer-photographe.netlify.app/g/';
+  const FOTOSTUDIO_URL   = 'https://www.fotostudio.io';
+  const clientLink = token => CLIENT_LINK_BASE + token;
   // ── FIRESTORE REST API (compatible Safari) ──
   const PROJECT_ID = firebaseConfig.projectId;
   const API_KEY = firebaseConfig.apiKey;
@@ -356,8 +360,7 @@
       if (expiry) clientData.expiry = expiry;
       await fsSet('clients', token, clientData);
       msg.className = 'msg success'; msg.textContent = 'Client créé !';
-      const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
-      generatedLink = `${baseUrl}index.html?token=${token}`;
+      generatedLink = clientLink(token);
       document.getElementById('linkCode').textContent = generatedLink;
       document.getElementById('tokenDisplay').textContent = token;
       document.getElementById('linkResult').style.display = 'block';
@@ -412,7 +415,7 @@
       <div class="client-actions">
         <button class="btn-ghost" onclick="toggleEdit('${c.id}')">✏️ Modifier</button>
         <button class="btn-ghost" onclick="copyClientLink('${c.id}')">🔗 Lien</button>
-        <button class="btn-ghost" onclick="sendEmail('${c.id}', '${c.nom}')">✉️ Email</button>
+        <button class="btn-ghost" onclick="sendViaFotostudio('${c.id}')">✉️ Fotostudio</button>
         <button class="btn-warning" onclick="toggleClient('${c.id}', ${c.actif!==false})">${c.actif!==false?'Désactiver':'Réactiver'}</button>
         <button class="btn-danger" onclick="askDelete('${c.id}')">🗑 Supprimer</button>
       </div>
@@ -663,53 +666,22 @@
     } catch(e) { alert('Erreur : ' + e.message); }
   };
 
-  window.sendEmail = function(token, nom) {
-    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
-    const lien = `${baseUrl}index.html?token=${token}`;
-    const sujet = encodeURIComponent(`Votre Album de Poche est prêt — David Boyer Photographe`);
-    const corps = encodeURIComponent(
-`Bonjour ${nom},
-
-Votre Album de Poche est prêt !
-
-Retrouvez vos photos en cliquant sur le lien ci-dessous :
-
-${lien}
-
-Ce lien vous est personnel. Il vous donne accès à votre galerie privée, accessible uniquement par vous.
-
-
-════════════════════════════
-💡 INSTALLER VOTRE GALERIE SUR VOTRE TÉLÉPHONE
-════════════════════════════
-
-⚠️ Important : installez l'application DEPUIS CE LIEN,
-sans fermer la page après avoir consulté vos photos.
-
-Sur iPhone / iPad (Safari) :
-  1. Ouvrez le lien ci-dessus dans Safari
-  2. Consultez vos photos
-  3. Appuyez sur le bouton Partager ↑ (en bas de l'écran)
-  4. Choisissez "Sur l'écran d'accueil"
-  5. Appuyez sur "Ajouter"
-  → Votre galerie s'ouvre directement à chaque fois !
-
-Sur Android (Chrome) :
-  1. Ouvrez le lien ci-dessus dans Chrome
-  2. Consultez vos photos
-  3. Appuyez sur les ⋮ en haut à droite
-  4. Choisissez "Ajouter à l'écran d'accueil"
-  5. Appuyez sur "Ajouter"
-  → Votre galerie s'ouvre directement à chaque fois !
-════════════════════════════`
-    );
-    window.location.href = `mailto:?subject=${sujet}&body=${corps}`;
+  // ── ENVOI VIA FOTOSTUDIO ──
+  // Copie le lien magique puis ouvre Fotostudio : sur la fiche du client,
+  // « Envoyer un email » → modèle « Album Poche – Vos photos sont prêtes »
+  // → coller le lien à la place de [COLLER LE LIEN ICI].
+  window.sendViaFotostudio = function(token) {
+    const lien = clientLink(token);
+    // On copie d'abord (pendant le clic), puis on ouvre Fotostudio
+    navigator.clipboard.writeText(lien).catch(() => {
+      prompt('Copie ce lien puis colle-le dans l\'email Fotostudio :', lien);
+    });
+    window.open(FOTOSTUDIO_URL, '_blank');
   };
 
   // ── COPIER LIEN ──
   window.copyClientLink = function(token) {
-    const baseUrl = window.location.origin + window.location.pathname.replace('admin.html','');
-    const link = `${baseUrl}index.html?token=${token}`;
+    const link = clientLink(token);
     navigator.clipboard.writeText(link).then(() => alert('Lien copié !'));
   };
 
