@@ -1,4 +1,6 @@
-// /g/CODE → ouvre la galerie du client
+// /g/CODE → sert directement la galerie du client, à cette adresse.
+// La page porte sa propre fiche d'installation (/m/CODE) : la tuile de l'écran
+// d'accueil s'ouvre donc toujours sur /g/CODE, quoi que le téléphone oublie.
 exports.handler = async (event) => {
   const token = (event.path.split('/').pop() || '').trim().toUpperCase();
 
@@ -6,14 +8,28 @@ exports.handler = async (event) => {
     return { statusCode: 302, headers: { Location: '/' } };
   }
 
+  const site = process.env.URL || 'https://david-boyer-photographe.netlify.app';
+  let html;
+  try {
+    const r = await fetch(`${site}/gallery.html`, { headers: { 'Cache-Control': 'no-cache' } });
+    if (!r.ok) throw new Error('gallery.html ' + r.status);
+    html = await r.text();
+  } catch (e) {
+    // En secours : ancienne méthode (redirection)
+    return { statusCode: 302, headers: { Location: `/gallery.html?t=${token}` } };
+  }
+
+  html = html
+    .replace('<head>', `<head>\n  <base href="/">\n  <script>window.__ALBUM_T = '${token}';</script>`)
+    .replace(/<link rel="manifest"[^>]*>/, `<link rel="manifest" href="/m/${token}">`);
+
   return {
-    statusCode: 302,
+    statusCode: 200,
     headers: {
-      Location: `/gallery.html?t=${encodeURIComponent(token)}`,
-      // Cookie posé par le serveur (plus durable sur iPhone qu'un cookie posé en JavaScript)
-      'Set-Cookie': `albumToken=${token}; Max-Age=31536000; Path=/; SameSite=Lax; Secure`,
-      'Cache-Control': 'no-store'
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'Set-Cookie': `albumToken=${token}; Max-Age=31536000; Path=/; SameSite=Lax; Secure`
     },
-    body: ''
+    body: html
   };
 };

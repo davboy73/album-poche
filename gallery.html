@@ -12,7 +12,7 @@
     // d'accueil le garde pour toujours, sans dépendre des cookies du téléphone.
     (function () {
       const ok = t => t && /^[A-Z0-9-]{6,40}$/.test(t);
-      const fromUrl = (new URLSearchParams(location.search).get('t') || '').trim().toUpperCase();
+      const fromUrl = (window.__ALBUM_T || new URLSearchParams(location.search).get('t') || '').trim().toUpperCase();
       const c = document.cookie.match('(^|;)\\s*albumToken\\s*=\\s*([^;]+)');
       let ls = null, ss = null;
       try { ls = localStorage.getItem('albumToken'); ss = sessionStorage.getItem('albumToken'); } catch (e) {}
@@ -21,10 +21,9 @@
       if (!t) return;
       try { localStorage.setItem('albumToken', t); sessionStorage.setItem('albumToken', t); } catch (e) {}
       document.cookie = 'albumToken=' + t + ';max-age=31536000;path=/;SameSite=Lax';
-      // Manifeste propre à ce client : la tuile s'ouvrira sur /g/CODE
-      document.getElementById('manifestLink').href = '/m/' + t;
-      // Remet le code dans l'adresse s'il n'y est pas (pour les anciens iPhone qui installent l'adresse affichée)
-      if (fromUrl !== t) history.replaceState(null, '', location.pathname + '?t=' + t);
+      // Ouverte en direct sur /gallery.html : on bascule sur l'adresse /g/CODE,
+      // servie par le serveur avec la fiche d'installation propre au client.
+      if (!window.__ALBUM_T) { location.replace('/g/' + t); return; }
     })();
   </script>
   <meta name="theme-color" content="#0e1b2a">
