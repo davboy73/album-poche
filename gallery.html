@@ -38,7 +38,9 @@
       --navy: #0e1b2a; --navy-light: #1a2d42; --navy-mid: #152333;
       --gold: #c9a96e; --cream: #f7f4ef; --text-muted: #8a9bb0;
     }
-    body { background: var(--navy); color: var(--cream); font-family: 'Montserrat', sans-serif; font-weight: 300; min-height: 100vh; user-select: none; -webkit-user-select: none; }
+    /* Bloque l'appui long « Enregistrer dans Photos » sur iPhone / iPad */
+    img { -webkit-touch-callout: none; -webkit-user-drag: none; user-drag: none; }
+    body { -webkit-touch-callout: none; background: var(--navy); color: var(--cream); font-family: 'Montserrat', sans-serif; font-weight: 300; min-height: 100vh; user-select: none; -webkit-user-select: none; }
     header { position: sticky; top: 0; z-index: 100; background: var(--navy); border-bottom: 1px solid rgba(201,169,110,0.12); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
     .header-initials { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; color: var(--gold); letter-spacing: 0.1em; }
     .header-name { font-size: 0.6rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-muted); margin-left: 0.75rem; }
@@ -255,6 +257,9 @@
 
   let isAnimating = false;
 
+  // Plein écran : version réduite (1600 px), jamais l'original pleine résolution
+  const displayUrl = url => url.replace('/upload/', '/upload/w_1600,h_1600,c_limit,q_auto:good,f_auto/');
+
   function updateLightbox(dir = 0) {
     if (isAnimating) return;
     isAnimating = true;
@@ -263,7 +268,7 @@
     const inClass = dir >= 0 ? 'slide-right' : 'slide-left';
     img.classList.add(outClass);
     setTimeout(() => {
-      img.src = photos[currentIndex];
+      img.src = displayUrl(photos[currentIndex]);
       img.classList.remove(outClass);
       img.classList.add(inClass);
       requestAnimationFrame(() => {
