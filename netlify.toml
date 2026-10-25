@@ -3,6 +3,11 @@
   to = "/.netlify/functions/client/:token"
   status = 200
 
+[[redirects]]
+  from = "/m/:token"
+  to = "/.netlify/functions/manifest/:token"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]

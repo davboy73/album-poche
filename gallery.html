@@ -6,7 +6,27 @@
   <title>Ma Galerie — David Boyer Photographe</title>
   <link rel="icon" href="favicon.ico">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="manifest" id="manifestLink" href="manifest.json">
+  <script>
+    // Le code d'accès voyage dans l'adresse (?t=…) : la tuile installée sur l'écran
+    // d'accueil le garde pour toujours, sans dépendre des cookies du téléphone.
+    (function () {
+      const ok = t => t && /^[A-Z0-9-]{6,40}$/.test(t);
+      const fromUrl = (new URLSearchParams(location.search).get('t') || '').trim().toUpperCase();
+      const c = document.cookie.match('(^|;)\\s*albumToken\\s*=\\s*([^;]+)');
+      let ls = null, ss = null;
+      try { ls = localStorage.getItem('albumToken'); ss = sessionStorage.getItem('albumToken'); } catch (e) {}
+      const t = [fromUrl, ss, c && c.pop(), ls].find(ok) || null;
+      window.ALBUM_TOKEN = t;
+      if (!t) return;
+      try { localStorage.setItem('albumToken', t); sessionStorage.setItem('albumToken', t); } catch (e) {}
+      document.cookie = 'albumToken=' + t + ';max-age=31536000;path=/;SameSite=Lax';
+      // Manifeste propre à ce client : la tuile s'ouvrira sur /g/CODE
+      document.getElementById('manifestLink').href = '/m/' + t;
+      // Remet le code dans l'adresse s'il n'y est pas (pour les anciens iPhone qui installent l'adresse affichée)
+      if (fromUrl !== t) history.replaceState(null, '', location.pathname + '?t=' + t);
+    })();
+  </script>
   <meta name="theme-color" content="#0e1b2a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -67,7 +87,6 @@
     <div class="header-client-name" id="clientName">—</div>
     <div class="header-client-count" id="clientCount"></div>
   </div>
-  <button class="btn-logout" onclick="logout()">Quitter</button>
 </header>
 
 <div class="gallery-header">
@@ -116,8 +135,7 @@
     return v ? v.pop() : null;
   }
 
-  let lsToken = null; try { lsToken = localStorage.getItem('albumToken'); } catch(e) {}
-  const token = sessionStorage.getItem('albumToken') || getCookie('albumToken') || lsToken;
+  const token = window.ALBUM_TOKEN;
   if (!token) { window.location.href = 'index.html'; }
 
   document.addEventListener('contextmenu', e => e.preventDefault());
@@ -288,12 +306,6 @@
     if (e.key==='ArrowLeft') { currentIndex = (currentIndex-1+photos.length)%photos.length; updateLightbox(-1); }
     if (e.key==='Escape') closeLightboxBtn();
   });
-
-  window.logout = function() { 
-    sessionStorage.clear(); 
-    document.cookie = 'albumToken=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/';
-    window.location.href = 'index.html'; 
-  };
 
   loadGallery();
   recordView(token);
