@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Restauration de photos anciennes | David BOYER Photographe</title>
+<meta name="description" content="Confiez vos photos de famille abîmées à David BOYER, photographe à Attignat : numérisation, restauration, colorisation et impression sur papier d’art.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0d1b2e; --navy-2:#172a47; --gold:#c9a962; --gold-ink:#7d6328;
+  --page:#f7f3eb; --print:#fffdf8; --ink:#1b2333; --muted:#5b6474; --line:#ddd3bf;
+  --error:#9e3227; --ok:#3e6b3a;
+  --serif:"EB Garamond", Garamond, "Times New Roman", serif;
+  --sans:"Montserrat", "Helvetica Neue", Arial, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{background:var(--navy)}
+body{margin:0;font-family:var(--sans);font-weight:300;color:var(--ink);background:var(--navy);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* En-tête */
+.top{max-width:1080px;margin:0 auto;padding:22px 24px;display:flex;justify-content:space-between;align-items:center;color:#e8e2d4;font-size:.85rem}
+.brand{font-family:var(--serif);font-size:1.25rem;letter-spacing:.02em;text-decoration:none;color:#fff}
+.brand span{color:var(--gold)}
+.top a.back{text-decoration:none;opacity:.8}
+.top a.back:hover{opacity:1}
+
+/* Hero */
+.hero{max-width:1080px;margin:0 auto;padding:40px 24px 72px;display:grid;gap:48px;align-items:center;color:#f2ede2}
+.hero.with-visual{grid-template-columns:1.05fr .95fr}
+.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.3rem,5.4vw,3.9rem);line-height:1.05;margin:0 0 22px;color:#fff;max-width:14ch}
+.hero p{font-size:1.02rem;max-width:46ch;margin:0 0 14px;color:#d5d0c4}
+.hero .facts{margin:26px 0 0;padding:0;list-style:none;display:grid;gap:8px;font-size:.92rem;color:#d5d0c4}
+.hero .facts li{padding-left:22px;position:relative}
+.hero .facts li::before{content:"";position:absolute;left:0;top:.72em;width:12px;height:1px;background:var(--gold)}
+
+/* Avant / après */
+.compare{position:relative;aspect-ratio:4/5;background:var(--print);padding:14px 14px 46px;box-shadow:0 30px 60px -20px rgba(0,0,0,.6);transform:rotate(1.2deg)}
+.compare .frame{position:relative;width:100%;height:100%;overflow:hidden}
+.compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.compare .after{clip-path:inset(0 0 0 var(--pos,50%))}
+.compare .bar{position:absolute;top:0;bottom:0;left:var(--pos,50%);width:2px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.15);pointer-events:none}
+.compare .bar::after{content:"";position:absolute;top:50%;left:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.compare input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ew-resize;margin:0}
+.compare .caption{position:absolute;left:0;right:0;bottom:12px;display:flex;justify-content:space-between;padding:0 18px;font-family:var(--serif);font-style:italic;color:var(--muted);font-size:1rem}
+
+/* Page d’album */
+.album{background:var(--page);color:var(--ink);padding:64px 24px 80px}
+.album-inner{max-width:760px;margin:0 auto}
+fieldset{border:0;margin:0 0 56px;padding:0;min-width:0}
+legend{font-family:var(--serif);font-size:2rem;font-weight:400;padding:0;margin-bottom:6px;color:var(--navy)}
+legend .n{color:var(--gold-ink);margin-right:.35em}
+.intro{color:var(--muted);margin:0 0 26px;max-width:60ch}
+
+.choices{display:grid;gap:12px}
+.choice{display:flex;gap:14px;align-items:flex-start;padding:18px 20px;background:var(--print);border:1px solid var(--line);cursor:pointer;transition:border-color .15s}
+.choice:hover{border-color:#c8b88f}
+.choice input{margin:5px 0 0;accent-color:var(--navy);width:18px;height:18px;flex:none}
+.choice strong{display:block;font-weight:500;font-size:1rem}
+.choice small{display:block;color:var(--muted);font-size:.88rem;margin-top:2px}
+.choice .price{margin-left:auto;font-family:var(--serif);font-size:1.05rem;color:var(--gold-ink);white-space:nowrap;padding-left:12px}
+.choice:has(input:checked){border-color:var(--navy);box-shadow:inset 3px 0 0 var(--gold)}
+.choices.two{grid-template-columns:1fr 1fr}
+
+/* Zone de dépôt */
+.drop{margin-top:24px;display:block;border:1.5px dashed #bfae86;background:rgba(255,253,248,.6);padding:38px 24px;text-align:center;cursor:pointer;transition:background .15s,border-color .15s}
+.drop:hover,.drop.over{background:var(--print);border-color:var(--navy)}
+.drop strong{font-family:var(--serif);font-size:1.4rem;font-weight:400;display:block;color:var(--navy)}
+.drop span{color:var(--muted);font-size:.88rem}
+.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.count{margin:14px 0 0;font-size:.88rem;color:var(--muted);min-height:1.4em}
+
+details.guide{margin-top:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+details.guide summary{cursor:pointer;padding:14px 0;font-weight:500;font-size:.95rem;list-style:none}
+details.guide summary::-webkit-details-marker{display:none}
+details.guide summary::after{content:"+";float:right;color:var(--gold-ink);font-size:1.2rem;line-height:1}
+details.guide[open] summary::after{content:"–"}
+details.guide ul{margin:0 0 16px;padding-left:20px;color:var(--muted);font-size:.92rem}
+details.guide li{margin-bottom:6px}
+
+/* Tirages avec coins photo : l’élément signature */
+.prints{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:26px 22px;margin-top:26px;padding:0;list-style:none}
+.prints li{position:relative;background:var(--print);padding:8px 8px 26px;box-shadow:0 6px 14px -8px rgba(13,27,46,.45)}
+.prints li:nth-child(3n+1){transform:rotate(-1.4deg)}
+.prints li:nth-child(3n+2){transform:rotate(.9deg)}
+.prints li:nth-child(3n){transform:rotate(-.4deg)}
+.prints .corner{position:absolute;width:18px;height:18px;background:var(--navy);z-index:2}
+.prints .tl{top:-3px;left:-3px;clip-path:polygon(0 0,100% 0,0 100%)}
+.prints .tr{top:-3px;right:-3px;clip-path:polygon(0 0,100% 0,100% 100%)}
+.prints .bl{bottom:-3px;left:-3px;clip-path:polygon(0 0,0 100%,100% 100%)}
+.prints .br{bottom:-3px;right:-3px;clip-path:polygon(100% 0,100% 100%,0 100%)}
+.prints .img{aspect-ratio:1;background:#e9e2d2;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.prints img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.92)}
+.prints .noimg{font-size:.72rem;color:var(--muted);padding:6px;text-align:center;word-break:break-all}
+.prints .name{position:absolute;left:8px;right:30px;bottom:5px;font-family:var(--serif);font-style:italic;font-size:.8rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prints button{position:absolute;right:5px;bottom:3px;border:0;background:none;color:var(--muted);font-size:1.1rem;line-height:1;cursor:pointer;padding:2px 4px}
+.prints button:hover{color:var(--error)}
+
+/* Champs */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label.lbl{font-size:.88rem;font-weight:500}
+input[type=text],input[type=email],input[type=tel],input[type=number],select,textarea{
+  font:inherit;font-weight:400;color:var(--ink);background:var(--print);border:1px solid var(--line);padding:12px 14px;border-radius:0;width:100%;
+  -webkit-appearance:none;appearance:none}
+select{background-image:linear-gradient(45deg,transparent 50%,var(--gold-ink) 50%),linear-gradient(135deg,var(--gold-ink) 50%,transparent 50%);background-position:calc(100% - 20px) 52%,calc(100% - 15px) 52%;background-size:5px 5px;background-repeat:no-repeat;padding-right:40px}
+input:focus,select:focus,textarea:focus{border-color:var(--navy);outline:none;box-shadow:0 0 0 3px rgba(201,169,98,.35)}
+textarea{min-height:110px;resize:vertical}
+.check{display:flex;gap:12px;align-items:flex-start;margin-top:18px;font-size:.92rem;cursor:pointer}
+.check input{accent-color:var(--navy);width:18px;height:18px;margin-top:3px;flex:none}
+.sub{margin-top:28px}
+
+/* Estimation */
+.estimate{margin-top:30px;background:var(--navy);color:#e9e4d8;padding:24px 26px;display:flex;flex-wrap:wrap;gap:6px 24px;align-items:baseline;justify-content:space-between}
+.estimate .label{font-size:.9rem}
+.estimate .value{font-family:var(--serif);font-size:2rem;color:#fff}
+.estimate .value small{font-size:1rem;color:var(--gold);margin-right:6px}
+.estimate p{flex-basis:100%;margin:6px 0 0;font-size:.82rem;color:#b9b4a8}
+
+/* Envoi */
+.submit{margin-top:32px;display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+button.primary{font:inherit;font-weight:500;font-size:1rem;letter-spacing:.02em;background:var(--navy);color:#fff;border:0;padding:16px 34px;cursor:pointer;transition:background .15s}
+button.primary:hover{background:var(--navy-2)}
+button.primary:disabled{opacity:.6;cursor:wait}
+.submit small{color:var(--muted);font-size:.82rem;max-width:36ch}
+.error{color:var(--error);font-weight:500;margin:16px 0 0;min-height:1.2em}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
+/* Progression */
+.progress{position:fixed;inset:0;background:rgba(13,27,46,.86);display:none;align-items:center;justify-content:center;z-index:50;padding:24px}
+.progress.on{display:flex}
+.progress .box{background:var(--page);max-width:420px;width:100%;padding:34px 30px;text-align:center}
+.progress h2{font-family:var(--serif);font-weight:400;font-size:1.6rem;margin:0 0 8px;color:var(--navy)}
+.progress p{margin:0 0 20px;color:var(--muted);font-size:.9rem}
+.track{height:4px;background:var(--line)}
+.track div{height:100%;width:0;background:var(--gold);transition:width .2s}
+
+/* Remerciement */
+.merci{text-align:center;padding:30px 0}
+.merci h2{font-family:var(--serif);font-weight:400;font-size:2.4rem;color:var(--navy);margin:0 0 14px}
+.merci p{color:var(--muted);max-width:52ch;margin:0 auto 12px}
+.merci .ref{display:inline-block;margin:14px 0 22px;font-family:var(--serif);font-size:1.5rem;color:var(--navy);border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:6px 18px}
+
+footer{color:#a9a597;text-align:center;font-size:.8rem;padding:30px 24px}
+footer a{color:#d8d2c3}
+
+[hidden]{display:none !important}
+
+@media (max-width:760px){
+  .hero.with-visual{grid-template-columns:1fr}
+  .compare{max-width:380px;margin:0 auto;transform:rotate(.8deg)}
+  .choices.two,.grid2{grid-template-columns:1fr}
+  .choice .price{display:none}
+  .choice small.p-mobile{display:block}
+  .album{padding:44px 18px 64px}
+}
+@media (min-width:761px){.choice small.p-mobile{display:none}}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="https://david-boyer-photographe.fr">David BOYER <span>Photographe</span></a>
+  <a class="back" href="https://david-boyer-photographe.fr">Retour au site</a>
+</header>
+
+<section class="hero" id="hero">
+  <div>
+    <h1>Vos photos de famille, restaurées et imprimées.</h1>
+    <p>Rayures, déchirures, couleurs passées : confiez-moi vos tirages anciens. Je les restaure à la main, une par une, puis je les imprime au studio sur papier d’art.</p>
+    <ul class="facts">
+      <li>Envoi en ligne ou dépôt des originaux au studio, à Attignat</li>
+      <li>Devis gratuit après examen de vos photos</li>
+      <li>Tirages réalisés sur imprimante pigmentaire professionnelle</li>
+    </ul>
+  </div>
+  <div class="compare" id="compare" hidden>
+    <div class="frame">
+      <img id="cmpBefore" alt="Photo avant restauration">
+      <img id="cmpAfter" class="after" alt="La même photo après restauration">
+      <div class="bar"></div>
+      <input type="range" min="0" max="100" value="50" aria-label="Comparer avant et après restauration">
+    </div>
+    <div class="caption"><span>avant</span><span>après</span></div>
+  </div>
+</section>
+
+<main class="album">
+  <div class="album-inner">
+
+  <form id="form" novalidate>
+
+    <fieldset>
+      <legend><span class="n">1</span>Vos photos</legend>
+      <p class="intro">Choisissez comment me transmettre vos photos. Pour les tirages précieux ou très abîmés, le dépôt au studio donne le meilleur résultat : je les numérise moi-même en haute définition.</p>
+
+      <div class="choices two" role="radiogroup">
+        <label class="choice">
+          <input type="radio" name="mode" value="en_ligne" checked>
+          <span><strong>Je les envoie en ligne</strong><small>Scans ou photos prises au téléphone</small></span>
+        </label>
+        <label class="choice">
+          <input type="radio" name="mode" value="studio">
+          <span><strong>Je les dépose au studio</strong><small>Sur rendez-vous, ou par courrier</small></span>
+        </label>
+      </div>
+
+      <div id="zoneLigne">
+        <label class="drop" id="drop">
+          <input type="file" id="files" multiple accept="image/jpeg,image/png,image/heic,image/heif,image/tiff,image/webp,.heic,.heif,.tif,.tiff">
+          <strong>Ajoutez vos photos</strong>
+          <span id="dropHint">Glissez-les ici ou touchez pour les choisir</span>
+        </label>
+        <p class="count" id="count" aria-live="polite"></p>
+        <ul class="prints" id="prints"></ul>
+
+        <details class="guide">
+          <summary>Bien photographier vos tirages avec un téléphone</summary>
+          <ul>
+            <li>Posez la photo bien à plat, près d’une fenêtre, sans soleil direct.</li>
+            <li>Coupez le flash et évitez les reflets : inclinez légèrement le tirage si besoin.</li>
+            <li>Tenez le téléphone bien parallèle à la photo, qui doit remplir tout l’écran.</li>
+            <li>Si la photo est sous verre ou dans un album collé, sortez-la si possible, sinon déposez-la au studio.</li>
+            <li>Un scanner à 600 dpi minimum donne un résultat encore meilleur.</li>
+          </ul>
+        </details>
+      </div>
+
+      <div id="zoneStudio" hidden>
+        <div class="grid2 sub">
+          <div class="field">
+            <label class="lbl" for="nbStudio">Nombre de photos, environ</label>
+            <input type="number" id="nbStudio" min="1" max="500" value="1" inputmode="numeric">
+          </div>
+        </div>
+        <p class="intro sub">Après votre demande, je vous recontacte pour fixer un rendez-vous de dépôt au studio. Vous pouvez aussi me les envoyer par courrier suivi : je vous donnerai l’adresse et je vous les retourne avec vos tirages.</p>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="n">2</span>La prestation</legend>
+      <p class="intro">Les tarifs sont indicatifs. Je vous envoie un devis précis après avoir vu vos photos.</p>
+
+      <div class="choices" id="prestations" role="radiogroup"></div>
+
+      <label class="check">
+        <input type="checkbox" id="coloriser">
+        <span id="colorLabel"></span>
+      </label>
+
+      <div class="grid2 sub">
+        <div class="field">
+          <label class="lbl" for="tirage">Tirage</label>
+          <select id="tirage"></select>
+        </div>
+        <div class="field">
+          <label class="lbl" for="exemplaires">Exemplaires par photo</label>
+          <input type="number" id="exemplaires" min="1" max="20" value="1" inputmode="numeric">
+        </div>
+        <div class="field full">
+          <label class="lbl" for="precisions">Précisions <span style="font-weight:300;color:var(--muted)">(facultatif)</span></label>
+          <textarea id="precisions" placeholder="Par exemple : enlever la tache sur le visage, recadrer sur mes grands-parents, photo pour un cadre 20 × 30…"></textarea>
+        </div>
+      </div>
+
+      <div class="estimate" aria-live="polite">
+        <span class="label" id="estLabel">Estimation indicative</span>
+        <span class="value" id="estValue"><small>à partir de</small>0 €</span>
+        <p>Devis définitif envoyé après examen de vos photos, sans engagement. Rien n’est facturé avant votre accord.</p>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend><span class="n">3</span>Vos coordonnées</legend>
+      <div class="grid2">
+        <div class="field">
+          <label class="lbl" for="firstname">Prénom</label>
+          <input type="text" id="firstname" autocomplete="given-name" required>
+        </div>
+        <div class="field">
+          <label class="lbl" for="lastname">Nom</label>
+          <input type="text" id="lastname" autocomplete="family-name" required>
+        </div>
+        <div class="field">
+          <label class="lbl" for="email">E-mail</label>
+          <input type="email" id="email" autocomplete="email" required>
+        </div>
+        <div class="field">
+          <label class="lbl" for="phone">Téléphone</label>
+          <input type="tel" id="phone" autocomplete="tel" required pattern="\+?[0-9 ().\/\-]+">
+        </div>
+      </div>
+
+      <label class="check">
+        <input type="checkbox" id="consent" required>
+        <span>J’accepte que mes photos et mes coordonnées soient utilisées pour traiter ma demande. Elles ne sont jamais partagées ni publiées sans mon accord.</span>
+      </label>
+
+      <div class="hp" aria-hidden="true"><input type="text" id="gotcha" tabindex="-1" autocomplete="off"></div>
+
+      <div class="submit">
+        <button type="submit" class="primary" id="send">Envoyer ma demande</button>
+        <small>Vous recevez votre devis sous 48 h ouvrées.</small>
+      </div>
+      <p class="error" id="error" role="alert"></p>
+    </fieldset>
+  </form>
+
+  <section class="merci" id="merci" hidden>
+    <h2>Demande envoyée</h2>
+    <p>Merci <span id="merciPrenom"></span>. J’ai bien reçu votre demande et je reviens vers vous très vite avec un devis.</p>
+    <div class="ref" id="merciRef"></div>
+    <p id="merciStudio" hidden>Je vous appelle pour convenir du dépôt de vos photos au studio.</p>
+    <p>Gardez cette référence : elle me permet de retrouver votre dossier.</p>
+  </section>
+
+  </div>
+</main>
+
+<div class="progress" id="progress" role="dialog" aria-modal="true" aria-labelledby="progTitle">
+  <div class="box">
+    <h2 id="progTitle">Envoi en cours</h2>
+    <p id="progText">Préparation…</p>
+    <div class="track"><div id="progBar"></div></div>
+  </div>
+</div>
+
+<!-- Passerelle vers Fotostudio : formulaire invisible envoyé dans un cadre caché -->
+<form id="fsForm" action="https://www.fotostudio.io/f/12d328fb188f51bd8dd1dd84b8c72113" method="POST" target="fsFrame" hidden>
+  <input type="hidden" name="lead_form[firstname]">
+  <input type="hidden" name="lead_form[lastname]">
+  <input type="hidden" name="lead_form[email]">
+  <input type="hidden" name="lead_form[phone]">
+  <input type="hidden" name="lead_form[project_type]">
+  <input type="hidden" name="lead_form[message]">
+  <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off">
+</form>
+<iframe name="fsFrame" id="fsFrame" title="Envoi Fotostudio" hidden></iframe>
+<!-- Anti-spam Fotostudio : ne pas supprimer -->
+<script src="https://www.fotostudio.io/f/12d328fb188f51bd8dd1dd84b8c72113/captcha.js" async></script>
+
+<footer>David BOYER Photographe, Attignat (Ain) · <a href="mailto:contact@david-boyer-photographe.com">contact@david-boyer-photographe.com</a></footer>
+
+<script>
+/* =====================================================================
+   CONFIGURATION : tout ce qui est à adapter se trouve ici
+   ===================================================================== */
+const CONFIG = {
+  // Cloudinary (même compte qu’Album Poche)
+  cloudName: "ulwuajnp",
+  uploadPreset: "restauration_unsigned",      // preset NON signé à créer
+  dossierCloudinary: "restauration",           // dossier racine
+
+  // Firestore (même projet qu’Album Poche)
+  firestoreProjectId: "album-poche-db",
+  firestoreApiKey: "AIzaSyCxFF3BwEwZOmi31apxZKJY8pAdTQWjsMU",
+  collection: "restaurations",
+
+  // Fotostudio : URL « Connecter votre propre formulaire »
+  fotostudioUrl: "https://www.fotostudio.io/f/12d328fb188f51bd8dd1dd84b8c72113",
+  fotostudioProjectType: "266746",                 // ID du type de séance « Restauration photos »
+
+  // Avant / après du haut de page (laisser vide pour masquer)
+  heroAvant: "",
+  heroApres: "",
+
+  // Limites
+  maxPhotos: 30,
+  maxMoParPhoto: 10,
+
+  // Tarifs indicatifs (à adapter)
+  prestations: [
+    { id:"legere",   nom:"Retouche légère",       desc:"Poussières, petites rayures, couleurs et contraste", prix:25 },
+    { id:"complete", nom:"Restauration complète", desc:"Déchirures, pliures, taches, parties manquantes",     prix:59 },
+    { id:"conseil",  nom:"Je ne sais pas",        desc:"Je regarde vos photos et je vous conseille",          prix:null }
+  ],
+  colorisation: 39,
+  numerisationStudio: 5,
+  tirages: [
+    { id:"aucun",       gamme:"",                taille:"Fichier numérique seul", prix:0 },
+    { id:"b-10x15",     gamme:"Tirage boutique", taille:"10 × 15 cm", prix:1 },
+    { id:"b-13x18",     gamme:"Tirage boutique", taille:"13 × 18 cm", prix:3 },
+    { id:"b-15x20",     gamme:"Tirage boutique", taille:"15 × 20 cm", prix:4 },
+    { id:"b-18x24",     gamme:"Tirage boutique", taille:"18 × 24 cm", prix:5 },
+    { id:"b-20x30",     gamme:"Tirage boutique", taille:"20 × 30 cm", prix:8 },
+    { id:"b-30x40",     gamme:"Tirage boutique", taille:"30 × 40 cm", prix:30 },
+    { id:"b-40x50",     gamme:"Tirage boutique", taille:"40 × 50 cm", prix:40 },
+    { id:"a-13x18",     gamme:"Tirage d’art",    taille:"13 × 18 cm", prix:25 },
+    { id:"a-20x30",     gamme:"Tirage d’art",    taille:"20 × 30 cm", prix:49 },
+    { id:"a-25x35",     gamme:"Tirage d’art",    taille:"25 × 35 cm, monté", prix:49 }
+  ]
+};
+/* ===================================================================== */
+
+const $ = s => document.querySelector(s);
+const euro = n => n.toLocaleString("fr-FR",{maximumFractionDigits:0}) + " €";
+let fichiers = [];
+
+/* Avant / après */
+if (CONFIG.heroAvant && CONFIG.heroApres) {
+  $("#cmpBefore").src = CONFIG.heroAvant;
+  $("#cmpAfter").src = CONFIG.heroApres;
+  $("#compare").hidden = false;
+  $("#hero").classList.add("with-visual");
+  $("#compare input").addEventListener("input", e => $("#compare").style.setProperty("--pos", e.target.value + "%"));
+}
+
+/* Construction des choix de prestation */
+$("#prestations").innerHTML = CONFIG.prestations.map((p,i) => `
+  <label class="choice">
+    <input type="radio" name="prestation" value="${p.id}" ${i===0?"checked":""}>
+    <span><strong>${p.nom}</strong><small>${p.desc}</small>
+      ${p.prix ? `<small class="p-mobile">dès ${euro(p.prix)} par photo</small>` : ""}</span>
+    ${p.prix ? `<span class="price">dès ${euro(p.prix)}</span>` : ""}
+  </label>`).join("");
+$("#colorLabel").textContent = `Coloriser les photos noir et blanc (dès ${euro(CONFIG.colorisation)} par photo)`;
+CONFIG.tirages.forEach(t => t.nom = t.gamme ? `${t.gamme} ${t.taille}` : t.taille);
+{
+  const opt = t => `<option value="${t.id}">${t.taille}${t.prix ? ` (${euro(t.prix)})` : ""}</option>`;
+  const gammes = [...new Set(CONFIG.tirages.map(t => t.gamme))];
+  $("#tirage").innerHTML = gammes.map(g => g
+    ? `<optgroup label="${g}">${CONFIG.tirages.filter(t => t.gamme===g).map(opt).join("")}</optgroup>`
+    : CONFIG.tirages.filter(t => !t.gamme).map(opt).join("")).join("");
+  $("#tirage").value = "b-13x18";
+}
+
+/* Mode de transmission */
+const mode = () => document.querySelector("input[name=mode]:checked").value;
+document.querySelectorAll("input[name=mode]").forEach(r => r.addEventListener("change", () => {
+  $("#zoneLigne").hidden = mode() !== "en_ligne";
+  $("#zoneStudio").hidden = mode() !== "studio";
+  estimer();
+}));
+
+/* Ajout des fichiers */
+const okType = f => /^image\//.test(f.type) || /\.(heic|heif|tif|tiff)$/i.test(f.name);
+function ajouter(liste) {
+  const err = [];
+  for (const f of liste) {
+    if (!okType(f)) { err.push(`${f.name} n’est pas une image`); continue; }
+    if (f.size > CONFIG.maxMoParPhoto * 1048576) { err.push(`${f.name} dépasse ${CONFIG.maxMoParPhoto} Mo`); continue; }
+    if (fichiers.length >= CONFIG.maxPhotos) { err.push(`Maximum ${CONFIG.maxPhotos} photos par demande. Pour plus, faites une deuxième demande ou déposez-les au studio.`); break; }
+    if (fichiers.some(x => x.name === f.name && x.size === f.size)) continue;
+    fichiers.push(f);
+  }
+  $("#error").textContent = err.join(". ");
+  afficher();
+}
+function afficher() {
+  const ul = $("#prints");
+  ul.querySelectorAll("img").forEach(i => URL.revokeObjectURL(i.src));
+  ul.innerHTML = "";
+  fichiers.forEach((f, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div class="img"></div><span class="name"></span>
+      <button type="button" aria-label="Retirer ${f.name}">×</button>`;
+    li.querySelector(".name").textContent = f.name;
+    const img = new Image();
+    img.alt = f.name;
+    img.onerror = () => { li.querySelector(".img").innerHTML = `<span class="noimg">Aperçu indisponible, la photo sera bien envoyée</span>`; };
+    img.src = URL.createObjectURL(f);
+    li.querySelector(".img").appendChild(img);
+    li.querySelector("button").onclick = () => { fichiers.splice(i,1); afficher(); };
+    ul.appendChild(li);
+  });
+  const mo = fichiers.reduce((s,f)=>s+f.size,0) / 1048576;
+  $("#count").textContent = fichiers.length
+    ? `${fichiers.length} photo${fichiers.length>1?"s":""} prête${fichiers.length>1?"s":""}, ${mo.toFixed(1).replace(".",",")} Mo`
+    : "";
+  $("#dropHint").textContent = fichiers.length ? "Vous pouvez en ajouter d’autres" : "Glissez-les ici ou touchez pour les choisir";
+  estimer();
+}
+$("#files").addEventListener("change", e => { ajouter([...e.target.files]); e.target.value = ""; });
+const drop = $("#drop");
+["dragenter","dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => ajouter([...e.dataTransfer.files]));
+
+/* Estimation */
+const nbPhotos = () => mode() === "studio" ? Math.max(1, parseInt($("#nbStudio").value)||1) : fichiers.length;
+function calcul() {
+  const p = CONFIG.prestations.find(x => x.id === document.querySelector("input[name=prestation]:checked").value);
+  const t = CONFIG.tirages.find(x => x.id === $("#tirage").value);
+  const n = nbPhotos();
+  const ex = Math.max(1, parseInt($("#exemplaires").value)||1);
+  const base = p.prix ?? CONFIG.prestations[0].prix;
+  let parPhoto = base + ($("#coloriser").checked ? CONFIG.colorisation : 0) + t.prix * ex;
+  if (mode() === "studio") parPhoto += CONFIG.numerisationStudio;
+  return { p, t, n, ex, total: n * parPhoto };
+}
+function estimer() {
+  const c = calcul();
+  $("#estLabel").textContent = c.n ? `Estimation indicative pour ${c.n} photo${c.n>1?"s":""}` : "Estimation indicative";
+  $("#estValue").innerHTML = `<small>à partir de</small>${euro(c.total)}`;
+}
+document.querySelector("#form").addEventListener("input", e => {
+  if (["prestation","tirage","exemplaires","coloriser","nbStudio"].some(k => e.target.name===k || e.target.id===k)) estimer();
+});
+estimer();
+
+/* Référence de commande */
+function reference() {
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  const alea = Math.random().toString(36).slice(2,6).toUpperCase();
+  return `RST-${String(d.getFullYear()).slice(2)}${p(d.getMonth()+1)}${p(d.getDate())}-${alea}`;
+}
+
+/* Envoi vers Cloudinary avec progression */
+function envoyerFichier(f, ref, onProgress) {
+  return new Promise((resolve, reject) => {
+    const fd = new FormData();
+    fd.append("file", f);
+    fd.append("upload_preset", CONFIG.uploadPreset);
+    fd.append("folder", `${CONFIG.dossierCloudinary}/${ref}`);
+    fd.append("tags", `restauration,${ref}`);
+    fd.append("context", `nom_origine=${f.name.replace(/[|=]/g,"_")}`);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${CONFIG.cloudName}/auto/upload`);
+    xhr.upload.onprogress = e => e.lengthComputable && onProgress(e.loaded);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const r = JSON.parse(xhr.responseText);
+        resolve({ nom: f.name, url: r.secure_url, publicId: r.public_id, octets: r.bytes, largeur: r.width, hauteur: r.height });
+      } else reject(new Error(`${f.name} : envoi refusé (${xhr.status})`));
+    };
+    xhr.onerror = () => reject(new Error(`${f.name} : connexion interrompue`));
+    xhr.send(fd);
+  });
+}
+async function envoyerTout(ref) {
+  const total = fichiers.reduce((s,f)=>s+f.size,0) || 1;
+  const charge = new Array(fichiers.length).fill(0);
+  const resultats = new Array(fichiers.length);
+  let fini = 0, idx = 0;
+  const maj = () => {
+    const pct = charge.reduce((a,b)=>a+b,0) / total * 100;
+    $("#progBar").style.width = Math.min(98, pct) + "%";
+    $("#progText").textContent = `Photo ${Math.min(fini+1, fichiers.length)} sur ${fichiers.length}. Gardez cette page ouverte.`;
+  };
+  async function worker() {
+    while (idx < fichiers.length) {
+      const i = idx++;
+      let essai = 0;
+      while (true) {
+        try {
+          resultats[i] = await envoyerFichier(fichiers[i], ref, l => { charge[i] = l; maj(); });
+          break;
+        } catch (e) { if (++essai >= 3) throw e; await new Promise(r => setTimeout(r, 1500 * essai)); }
+      }
+      charge[i] = fichiers[i].size; fini++; maj();
+    }
+  }
+  maj();
+  await Promise.all([worker(), worker(), worker()]);
+  return resultats;
+}
+
+/* Enregistrement Firestore (REST) */
+function fsVal(v) {
+  if (v === null || v === undefined) return { nullValue: null };
+  if (typeof v === "boolean") return { booleanValue: v };
+  if (typeof v === "number") return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
+  if (v instanceof Date) return { timestampValue: v.toISOString() };
+  if (Array.isArray(v)) return { arrayValue: { values: v.map(fsVal) } };
+  if (typeof v === "object") return { mapValue: { fields: Object.fromEntries(Object.entries(v).map(([k,x]) => [k, fsVal(x)])) } };
+  return { stringValue: String(v) };
+}
+async function enregistrer(ref, data) {
+  if (CONFIG.firestoreProjectId.startsWith("VOTRE")) return;
+  const url = `https://firestore.googleapis.com/v1/projects/${CONFIG.firestoreProjectId}/databases/(default)/documents/${CONFIG.collection}?documentId=${ref}&key=${CONFIG.firestoreApiKey}`;
+  const res = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" },
+    body: JSON.stringify({ fields: Object.fromEntries(Object.entries(data).map(([k,v]) => [k, fsVal(v)])) }) });
+  if (!res.ok) throw new Error("Enregistrement de la demande impossible");
+}
+
+/* Transmission à Fotostudio (contact + séance), via le formulaire caché
+   pour que l’anti-spam Fotostudio ajoute son jeton */
+function versFotostudio(champs) {
+  return new Promise(resolve => {
+    const f = $("#fsForm"), frame = $("#fsFrame");
+    for (const [k,v] of Object.entries(champs)) {
+      const el = f.querySelector(`[name="lead_form[${k}]"]`);
+      if (el) el.value = v;
+    }
+    const fin = () => { clearTimeout(t); frame.removeEventListener("load", fin); resolve(); };
+    const t = setTimeout(fin, 15000);
+    frame.addEventListener("load", fin);
+    if (f.requestSubmit) f.requestSubmit(); else f.submit();
+  });
+}
+
+/* Soumission */
+$("#form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const err = $("#error"); err.textContent = "";
+  if ($("#gotcha").value) return;
+
+  const prenom = $("#firstname").value.trim(), nom = $("#lastname").value.trim(), email = $("#email").value.trim();
+  if (mode() === "en_ligne" && !fichiers.length) { err.textContent = "Ajoutez au moins une photo, ou choisissez le dépôt au studio."; $("#drop").focus(); return; }
+  if (!prenom || !nom) { err.textContent = "Indiquez votre prénom et votre nom."; $("#firstname").focus(); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = "Vérifiez votre adresse e-mail."; $("#email").focus(); return; }
+  if (!$("#phone").value.trim() || !$("#phone").checkValidity()) { err.textContent = "Indiquez un numéro de téléphone valide."; $("#phone").focus(); return; }
+  if (!$("#consent").checked) { err.textContent = "Cochez la case d’accord pour envoyer votre demande."; return; }
+
+  const ref = reference();
+  const c = calcul();
+  const btn = $("#send"); btn.disabled = true;
+  $("#progress").classList.add("on");
+
+  try {
+    let photos = [];
+    if (mode() === "en_ligne") photos = await envoyerTout(ref);
+    $("#progText").textContent = "Enregistrement de votre demande…";
+    $("#progBar").style.width = "99%";
+
+    const resume = {
+      reference: ref,
+      statut: "recue",
+      creeLe: new Date(),
+      client: { prenom, nom, email, telephone: $("#phone").value.trim() },
+      mode: mode(),
+      nbPhotos: c.n,
+      prestation: c.p.nom,
+      colorisation: $("#coloriser").checked,
+      tirage: c.t.nom,
+      exemplaires: c.ex,
+      precisions: $("#precisions").value.trim(),
+      estimation: c.total,
+      photos
+    };
+    await enregistrer(ref, resume);
+
+    const lignes = [
+      `Demande de restauration ${ref}`,
+      `Transmission : ${mode()==="studio" ? "dépôt des originaux au studio" : "envoi en ligne"}`,
+      `Photos : ${c.n}`,
+      `Prestation : ${c.p.nom}${$("#coloriser").checked ? " + colorisation" : ""}`,
+      `Tirage : ${c.t.nom}${c.t.prix ? ` x ${c.ex}` : ""}`,
+      `Estimation affichée : à partir de ${euro(c.total)}`,
+      resume.precisions ? `Précisions : ${resume.precisions}` : "",
+      photos.length ? `Fichiers :\n${photos.map(p => p.url).join("\n")}` : ""
+    ].filter(Boolean).join("\n");
+
+    const champs = { firstname: prenom, lastname: nom, email, phone: resume.client.telephone, message: lignes, project_type: CONFIG.fotostudioProjectType };
+    await versFotostudio(champs);
+
+    $("#progBar").style.width = "100%";
+    $("#form").hidden = true;
+    $("#merciPrenom").textContent = prenom;
+    $("#merciRef").textContent = ref;
+    $("#merciStudio").hidden = mode() !== "studio";
+    $("#merci").hidden = false;
+    window.scrollTo({ top: $(".album").offsetTop, behavior: "smooth" });
+  } catch (x) {
+    err.textContent = `${x.message}. Vérifiez votre connexion puis cliquez à nouveau sur « Envoyer ma demande ».`;
+  } finally {
+    $("#progress").classList.remove("on");
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>
